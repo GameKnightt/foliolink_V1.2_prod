@@ -417,6 +417,7 @@ const handleFileUpload = async (event: Event) => {
   error.value = ''
   
   try {
+    // The storageService.uploadAvatar now handles deletion of old avatar automatically
     const { data, error: uploadError } = await storageService.uploadAvatar(props.user.id, file)
     
     if (uploadError) {

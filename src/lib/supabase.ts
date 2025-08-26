@@ -615,8 +615,30 @@ export const aiService = {
 // Storage Service
 export const storageService = {
   async uploadAvatar(userId: string, file: File) {
+    try {
+      // First, try to delete the existing avatar if it exists
+      const { data: profile } = await profileService.getProfile(userId)
+      if (profile?.avatar_url) {
+        // Extract the file path from the URL
+        const urlParts = profile.avatar_url.split('/')
+        const fileName = urlParts[urlParts.length - 1]
+        const filePath = `${userId}/${fileName}`
+        
+        console.log('Deleting old avatar:', filePath)
+        // Delete old avatar (don't throw error if it doesn't exist)
+        await supabase.storage
+          .from('avatars')
+          .remove([filePath])
+          .catch(error => console.warn('Could not delete old avatar:', error))
+      }
+    } catch (error) {
+      console.warn('Error checking/deleting old avatar:', error)
+      // Continue with upload even if deletion fails
+    }
+
     const fileExt = file.name.split('.').pop()
-    const fileName = `avatar-${userId}-${Date.now()}.${fileExt}`
+    // Use consistent filename to enable overwriting
+    const fileName = `avatar-${userId}.${fileExt}`
     const filePath = `${userId}/${fileName}`
 
     const { data, error } = await supabase.storage
@@ -641,8 +663,30 @@ export const storageService = {
 // Background Service
 export const backgroundService = {
   async uploadBackground(userId: string, file: File) {
+    try {
+      // First, try to delete the existing background if it exists
+      const { data: profile } = await profileService.getProfile(userId)
+      if (profile?.background_url && profile.background_type === 'image') {
+        // Extract the file path from the URL
+        const urlParts = profile.background_url.split('/')
+        const fileName = urlParts[urlParts.length - 1]
+        const filePath = `${userId}/${fileName}`
+        
+        console.log('Deleting old background:', filePath)
+        // Delete old background (don't throw error if it doesn't exist)
+        await supabase.storage
+          .from('backgrounds')
+          .remove([filePath])
+          .catch(error => console.warn('Could not delete old background:', error))
+      }
+    } catch (error) {
+      console.warn('Error checking/deleting old background:', error)
+      // Continue with upload even if deletion fails
+    }
+
     const fileExt = file.name.split('.').pop()
-    const fileName = `background-${userId}-${Date.now()}.${fileExt}`
+    // Use consistent filename to enable overwriting
+    const fileName = `background-${userId}.${fileExt}`
     const filePath = `${userId}/${fileName}`
 
     const { data, error } = await supabase.storage
@@ -668,6 +712,29 @@ export const backgroundService = {
       .from('profiles')
       .update(backgroundData)
       .eq('id', userId)
+  },
+
+  async deleteBackground(userId: string, backgroundUrl: string) {
+    try {
+      // Extract the file path from the URL
+      const urlParts = backgroundUrl.split('/')
+      const fileName = urlParts[urlParts.length - 1]
+      const filePath = `${userId}/${fileName}`
+      
+      const { error } = await supabase.storage
+        .from('backgrounds')
+        .remove([filePath])
+      
+      if (error) {
+        console.error('Error deleting background:', error)
+        return { error }
+      }
+      
+      return { error: null }
+    } catch (error) {
+      console.error('Error in deleteBackground:', error)
+      return { error }
+    }
   }
 }
 
