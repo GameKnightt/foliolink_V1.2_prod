@@ -220,12 +220,12 @@
             <!-- Quick Add Button (visible on hover) -->
             <div 
               v-if="isAuthenticated && !isCategoryCollapsed(category.id)"
-              class="absolute top-2 right-20 opacity-0 group-hover:opacity-100 transition-all duration-300 z-0"
+              class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10"
             >
               <button 
                 @click="$emit('add-apprentissage', competence.id, level, category.id)"
                 @click.stop
-                class="bg-accent-500 hover:bg-accent-600 text-white p-2 rounded-lg shadow-lg transition-all duration-300 hover:scale-105 flex items-center space-x-1 relative"
+                class="bg-accent-500 hover:bg-accent-600 text-white p-1 rounded-lg shadow-lg transition-all duration-300 hover:scale-105 flex items-center space-x-1 relative text-xs"
                 :class="{ 
                   'opacity-60 cursor-not-allowed filter blur-[1px]': !canCreateApprentissage
                 }"
@@ -234,8 +234,8 @@
                 <div v-if="!canCreateApprentissage" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center shadow-lg z-10">
                   <span class="text-white text-xs">🔒</span>
                 </div>
-                <PlusIcon class="w-4 h-4" />
-                <span class="text-xs font-medium">Ajouter</span>
+                <PlusIcon class="w-3 h-3" />
+                <span class="font-medium">+</span>
               </button>
             </div>
             
