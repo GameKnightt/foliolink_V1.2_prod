@@ -1,403 +1,420 @@
 <template>
-  <div class="pt-16 min-h-screen bg-gray-50 dark:bg-gray-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Header -->
-      <div class="text-center mb-12">
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-          Portfolio de <span class="gradient-text text-glow">Compétences BUT</span>
-        </h1>
-        <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
-          Présentation détaillée de mes compétences BUT avec apprentissages critiques et preuves de maîtrise
-        </p>
-        
-        <!-- Filters and Search -->
-        <div class="flex flex-col gap-4 justify-center items-center max-w-4xl mx-auto">
-          <!-- First row: Search and filters -->
-          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center w-full">
-            <div class="relative flex-1 w-full sm:w-auto min-w-[280px]">
-              <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                v-model="searchTerm"
-                type="text"
-                placeholder="Rechercher"
-                class="input-field pl-10 h-12 text-base"
-              />
-            </div>
-            <select v-model="selectedCompetenceFilter" class="input-field w-full sm:w-auto h-12 min-w-[200px]">
-              <option value="">Toutes les compétences</option>
-              <option v-for="comp in competences" :key="comp.id" :value="comp.id">
-                {{ comp.title }}
-              </option>
-            </select>
-            <select v-model="sortBy" class="input-field w-full sm:w-auto h-12 min-w-[150px]">
-              <option value="default">Tri par défaut</option>
-              <option value="title">Titre A-Z</option>
-              <option value="recent">Plus récents</option>
-              <option value="evaluation">Évaluation</option>
-              <option value="level">Par niveau</option>
-            </select>
-            <select v-model="filterFeatured" class="input-field w-full sm:w-auto h-12 min-w-[180px]">
-              <option value="">Tous les apprentissages</option>
-              <option value="featured">Apprentissages vedettes ⭐</option>
-              <option value="not-featured">Non mis en vedette</option>
-            </select>
-          </div>
+  <div class="pt-16 min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
+    <!-- Hero Section -->
+    <section class="relative py-20 overflow-hidden">
+      <!-- Animated Background Elements -->
+      <div class="absolute inset-0">
+        <div class="absolute top-20 left-10 w-72 h-72 bg-accent-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute bottom-20 right-10 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      </div>
+      
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
+        <!-- Badge -->
+        <div class="inline-flex items-center glass-card px-6 py-3 mb-8 animate-fade-in">
+          <span class="text-accent-400 mr-2">🎯</span>
+          <span class="text-white font-medium">Compétences BUT</span>
+        </div>
+
+        <!-- Main Title -->
+        <div class="animate-slide-up">
+          <h1 class="text-6xl md:text-8xl font-bold text-white mb-6 leading-tight">
+            Mes <span class="gradient-text text-glow">Compétences</span>
+          </h1>
           
-          <!-- Second row: Action buttons -->
-          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center w-full">
-            <!-- Mobile Action Menu for authenticated users -->
-            <MobileActionMenu v-if="isAuthenticated" title="Actions" icon="⚙️">
-              <!-- Desktop Buttons -->
-              <template #desktop-buttons>
-                <button 
-                  @click="handleAddCompetenceClick"
-                  class="btn-primary whitespace-nowrap h-12 px-6 text-sm font-semibold flex items-center justify-center relative group transition-all duration-300"
-                  :class="{ 'opacity-60 cursor-not-allowed filter blur-[1px]': !canCreateCompetence }"
-                >
-                  <div v-if="!canCreateCompetence" class="absolute -top-2 -right-2 w-7 h-7 bg-red-500 rounded-full flex items-center justify-center shadow-lg z-10">
-                    <span class="text-white text-sm">🔒</span>
-                  </div>
-                  <div v-if="!canCreateCompetence" class="absolute inset-0 bg-gray-500/20 backdrop-blur-[1px] rounded-xl pointer-events-none"></div>
-                  <PlusIcon class="w-4 h-4 mr-2" />
-                  Ajouter Compétence
-                </button>
-                <ButProgramsDropdown />
-                <button 
-                  v-if="userLimits?.isPremium"
-                  @click="handleExportClick"
-                  :disabled="exportLoading"
-                  class="btn-secondary whitespace-nowrap h-12 px-6 text-sm font-semibold flex items-center justify-center"
-                >
-                  <ArrowDownTrayIcon class="w-4 h-4 mr-2" />
-                  {{ exportLoading ? 'Export...' : 'Exporter Excel' }}
-                </button>
-              </template>
-              
-              <!-- Mobile Buttons -->
-              <template #mobile-buttons>
-                <button 
-                  @click="handleAddCompetenceClick"
-                  class="w-full btn-primary h-12 px-4 text-sm font-semibold flex items-center justify-center relative group transition-all duration-300"
-                  :class="{ 'opacity-60 cursor-not-allowed filter blur-[1px]': !canCreateCompetence }"
-                >
-                  <div v-if="!canCreateCompetence" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-lg z-10">
-                    <span class="text-white text-xs">🔒</span>
-                  </div>
-                  <PlusIcon class="w-4 h-4 mr-2" />
-                  Ajouter Compétence
-                </button>
-                
-                <div class="w-full">
-                  <ButProgramsDropdown />
-                </div>
-                
-                <button 
-                  v-if="userLimits?.isPremium"
-                  @click="handleExportClick"
-                  :disabled="exportLoading"
-                  class="w-full btn-secondary h-12 px-4 text-sm font-semibold flex items-center justify-center"
-                >
-                  <ArrowDownTrayIcon class="w-4 h-4 mr-2" />
-                  {{ exportLoading ? 'Export...' : 'Exporter Excel' }}
-                </button>
-              </template>
-            </MobileActionMenu>
-            
-            <!-- Non-authenticated user buttons -->
-            <div v-else class="flex flex-col sm:flex-row gap-4 justify-center items-center w-full">
-              <ButProgramsDropdown />
-            </div>
-          </div>
-        
+          <p class="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
+            Découvrez mes compétences BUT avec leurs apprentissages critiques et évaluations de maîtrise
+          </p>
+          
           <!-- Limits Display for Non-Premium Users -->
-          <div v-if="userLimits && !userLimits.isPremium && isAuthenticated" class="mt-8 max-w-2xl mx-auto">
+          <div v-if="userLimits && !userLimits.isPremium && isAuthenticated" class="mt-8 max-w-md mx-auto">
             <div class="glass-card p-4">
               <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                  <LimitCounter 
-                    type="competences"
-                    :current="userLimits.current.competences"
-                    :max="userLimits.limits.competences"
-                    :is-premium="userLimits.isPremium"
-                  />
-                  <LimitCounter 
-                    type="apprentissages"
-                    :current="userLimits.current.apprentissages"
-                    :max="userLimits.limits.apprentissages"
-                    :is-premium="userLimits.isPremium"
-                  />
-                </div>
+                <LimitCounter 
+                  type="apprentissages"
+                  :current="userLimits.current.apprentissages"
+                  :max="userLimits.limits.apprentissages"
+                  :is-premium="userLimits.isPremium"
+                />
                 <router-link to="/pricing" class="text-accent-400 hover:text-accent-300 text-sm font-medium transition-colors">
-                  Acheter Premium →
+                  Premium →
                 </router-link>
               </div>
             </div>
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- Competences -->
-      <div class="space-y-12">
-        <div 
-          v-for="competence in filteredCompetences" 
-          :key="competence.id"
-          class="animate-slide-up"
-        >
-          <CompetenceSection 
-            :competence="competence"
-            :apprentissages="getApprentissagesForCompetence(competence.id)"
-            :featured-apprentissages="featuredApprentissages"
-            :user-limits="userLimits"
-            :categories="categories"
-            :is-authenticated="isAuthenticated"
-            @add-apprentissage="handleAddApprentissageWithCategory"
-            @show-premium-notification="handleShowPremiumNotification"
-            @edit-apprentissage="openEditModal"
-            @delete-apprentissage="deleteApprentissage"
-            @view-apprentissage="openViewModal"
-            @open-project="openProjectFromApprentissage"
-            @toggle-featured="toggleFeaturedApprentissage"
-            @edit-competence="openEditCompetenceModal"
-            @delete-competence="deleteCompetence"
-            @add-category="openAddCategoryModal"
-            @edit-category="openEditCategoryModal"
-            @delete-category="deleteCategory"
-          >
-            <template #add-button="{ competenceId, level }">
-              <button 
-                v-if="isAuthenticated"
-                @click="openAddModal(competenceId, level)"
-                class="btn-secondary text-sm px-4 py-2 flex items-center space-x-2"
-              >
-                <PlusIcon class="w-4 h-4" />
-                <span>Ajouter un apprentissage détaillé</span>
-              </button>
-              <div 
-                v-else
-                @click="() => { router.push('/'); openAuthModal() }"
-                class="text-accent-400 hover:text-accent-300 cursor-pointer transition-colors"
-              >
-                Connectez-vous pour ajouter des apprentissages détaillés
-              </div>
-            </template>
-            <template #apprentissage-actions="{ apprentissage }">
-              <button 
-                v-if="isAuthenticated"
-                @click="openEditModal(apprentissage)"
-                @click.stop
-                class="p-1 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                title="Modifier"
-              >
-                <PencilIcon class="w-4 h-4" />
-              </button>
-              <button 
-                v-if="isAuthenticated"
-                @click="deleteApprentissage(apprentissage.id)"
-                @click.stop
-                class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                title="Supprimer"
-              >
-                <TrashIcon class="w-4 h-4" />
-              </button>
-              <button 
-                v-if="isAuthenticated"
-                @click="toggleFeaturedApprentissage(apprentissage)"
-                @click.stop
-                class="p-1 transition-opacity"
-                :class="featuredApprentissages.includes(apprentissage.id) ? 'text-accent-400 opacity-100' : 'text-gray-400 hover:text-accent-400 opacity-0 group-hover:opacity-100'"
-                :title="featuredApprentissages.includes(apprentissage.id) ? 'Retirer des vedettes' : 'Épingler en vedette'"
-              >
-                <span class="text-sm">{{ featuredApprentissages.includes(apprentissage.id) ? '⭐' : '☆' }}</span>
-              </button>
-            </template>
-          </CompetenceSection>
+    <!-- Drag and Drop Status -->
+    <div v-if="isDragging" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 glass-card p-4 animate-bounce">
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 bg-accent-400/20 rounded-full flex items-center justify-center animate-spin">
+          <span class="text-accent-400">🔄</span>
+        </div>
+        <div>
+          <p class="text-white font-medium text-sm">Déplacement en cours...</p>
+          <p class="text-gray-300 text-xs">Déposez dans une zone compatible</p>
         </div>
       </div>
-
-      <!-- Add/Edit Modal -->
-      <ApprentissageModal
-        v-if="showModal"
-        :apprentissage="selectedApprentissage"
-        :competences="competences"
-        :projets="projets"
-        :categories="categories"
-        @save="saveApprentissage"
-        @close="closeModal"
-      />
-
-      <!-- View Modal -->
-      <ApprentissageViewModal
-        v-if="showViewModal"
-        :apprentissage="viewApprentissage"
-        :competences="competences"
-        @close="closeViewModal"
-        @edit="editFromView"
-        @open-project="openProjectFromApprentissage"
-      >
-        <template #edit-button>
-          <button 
-            v-if="isAuthenticated"
-            @click="editFromView"
-            class="btn-secondary flex items-center space-x-2"
-          >
-            <PencilIcon class="w-4 h-4" />
-            <span>Modifier</span>
-          </button>
-        </template>
-      </ApprentissageViewModal>
-
-      <!-- Confirm Delete Modal -->
-      <ConfirmModal
-        v-if="showConfirmModal"
-        title="Supprimer l'apprentissage critique"
-        message="Êtes-vous sûr de vouloir supprimer cet apprentissage critique ? Cette action est irréversible."
-        @confirm="confirmDelete"
-        @cancel="cancelDelete"
-      />
-
-      <!-- Confirm Delete Competence Modal -->
-      <ConfirmModal
-        v-if="showCompetenceConfirmModal"
-        title="Supprimer la compétence"
-        message="Êtes-vous sûr de vouloir supprimer cette compétence ? Tous les apprentissages associés seront également supprimés. Cette action est irréversible."
-        @confirm="confirmDeleteCompetence"
-        @cancel="cancelDeleteCompetence"
-      />
-
-      <!-- Competence Modal -->
-      <CompetenceModal
-        v-if="showCompetenceModal"
-        :competence="selectedCompetenceForModal"
-        @save="saveCompetence"
-        @close="closeCompetenceModal"
-      />
-
-      <!-- Project Modal -->
-      <ProjectModal
-        v-if="showProjectModal && selectedProject"
-        :project="getProjectDetails(selectedProject)"
-        @close="closeProjectModal"
-      />
-
-      <!-- Limit Modal -->
-      <LimitModal
-        v-if="showLimitModal"
-        @close="showLimitModal = false"
-      />
-
-      <!-- Duplicate Modal -->
-      <DuplicateModal
-        v-if="showDuplicateModal.show"
-        :title="showDuplicateModal.title"
-        :message="showDuplicateModal.message"
-        @close="showDuplicateModal.show = false"
-        @edit-existing="editExistingItem"
-      />
-      
-      <!-- Premium Limit Modal -->
-      <PremiumNotification
-        v-if="showPremiumNotification"
-        :title="premiumNotificationData.title"
-        :message="premiumNotificationData.message"
-        :duration="5000"
-        @close="showPremiumNotification = false"
-      />
-      
-      <!-- Category Modal -->
-      <CategoryModal
-        v-if="showCategoryModal"
-        :category="selectedCategory"
-        :competence-id="categoryCompetenceId"
-        :level="categoryLevel"
-        :competence-title="getCompetenceTitle(categoryCompetenceId)"
-        @save="saveCategory"
-        @close="closeCategoryModal"
-      />
-      
-      <!-- Confirm Delete Category Modal -->
-      <ConfirmModal
-        v-if="showCategoryConfirmModal"
-        title="Supprimer l'apprentissage critique"
-        message="Êtes-vous sûr de vouloir supprimer cet apprentissage critique ? Les apprentissages ne seront pas supprimés mais deviendront non catégorisés."
-        @confirm="confirmDeleteCategory"
-        @cancel="cancelDeleteCategory"
-      />
-      
-      <!-- Trophy Modal -->
-      <TrophyModal
-        v-if="showTrophyModal"
-        :new-trophies="newTrophies"
-        :current-level="currentLevel"
-        :total-points="0"
-        @close="closeTrophyModal"
-      />
     </div>
+
+    <!-- Save Status -->
+    <div v-if="isSaving" class="fixed top-20 right-4 z-50 glass-card p-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center animate-pulse">
+          <span class="text-blue-400">💾</span>
+        </div>
+        <span class="text-white text-sm">Sauvegarde...</span>
+      </div>
+    </div>
+
+    <!-- Compétences Section -->
+    <section class="py-20 relative">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="space-y-12">
+          <!-- Add Competence Button -->
+          <div 
+            class="glass-card p-8 hover:scale-105 transition-all duration-500 group cursor-pointer border-2 border-dashed border-accent-400/50 hover:border-accent-400 relative" 
+            :class="{ 
+              'opacity-60 cursor-not-allowed backdrop-blur-sm': !canCreateCompetence && isAuthenticated,
+              'hover:shadow-lg': canCreateCompetence && isAuthenticated
+            }"
+            @click="openAddCompetenceModal"
+          >
+            <div v-if="!canCreateCompetence" class="absolute -top-2 -right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center shadow-lg z-10">
+              <span class="text-white text-sm">🔒</span>
+            </div>
+            <div v-if="!canCreateCompetence" class="absolute inset-0 bg-gray-500/20 backdrop-blur-[1px] rounded-2xl"></div>
+            <div class="flex flex-col items-center justify-center h-full min-h-[200px] text-center">
+              <div class="w-16 h-16 bg-accent-400/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <span class="text-3xl text-accent-400">➕</span>
+              </div>
+              <h3 class="text-2xl font-bold text-white mb-4">
+                {{ !isAuthenticated ? 'Connexion Requise' : (!canCreateCompetence ? 'Limite Atteinte - Premium Requis' : 'Ajouter une Nouvelle Compétence') }}
+              </h3>
+              <p class="text-gray-300 leading-relaxed">
+                {{ !isAuthenticated 
+                  ? 'Connectez-vous pour ajouter de nouvelles compétences à votre portfolio.'
+                  : (!canCreateCompetence 
+                    ? `Vous avez atteint la limite de ${userLimits?.limits.competences || 3} compétences. Achetez Premium pour créer des compétences illimitées.`
+                    : 'Cliquez ici pour ajouter une nouvelle compétence à votre portfolio et enrichir vos apprentissages.')
+                }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Competences List with Drag and Drop -->
+          <DragDropZone
+            v-for="competence in competences"
+            :key="competence.id"
+            :zone-id="`competence-${competence.id}`"
+            type="competence-level"
+            :competence-id="competence.id"
+            :level="1"
+            base-classes="mb-8"
+            :accept-types="['category', 'apprentissage']"
+          >
+            <CompetenceSection
+              :competence="competence"
+              :apprentissages="getApprentissagesForCompetence(competence.id)"
+              :featured-apprentissages="featuredApprentissages"
+              :user-limits="userLimits"
+              :categories="categories"
+              :is-authenticated="isAuthenticated"
+              @add-apprentissage="openAddApprentissageModal"
+              @edit-apprentissage="openEditApprentissageModal"
+              @delete-apprentissage="deleteApprentissage"
+              @view-apprentissage="openViewApprentissageModal"
+              @open-project="openProjectFromApprentissage"
+              @edit-competence="openEditCompetenceModal"
+              @delete-competence="deleteCompetence"
+              @toggle-featured="toggleFeaturedApprentissage"
+              @add-category="openAddCategoryModal"
+              @edit-category="openEditCategoryModal"
+              @delete-category="deleteCategory"
+            />
+          </DragDropZone>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="text-center mt-16">
+          <div class="glass-card p-8 max-w-2xl mx-auto">
+            <h3 class="text-2xl font-bold text-white mb-4">Gestion des Compétences</h3>
+            <p class="text-gray-300 mb-6">
+              Explorez mes compétences BUT ou ajoutez de nouveaux apprentissages critiques.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <!-- Mobile Action Menu for authenticated users -->
+              <MobileActionMenu v-if="isAuthenticated" title="Actions" icon="🎯">
+                <!-- Desktop Buttons -->
+                <template #desktop-buttons>
+                  <button 
+                    @click="handleAddCompetenceClick"
+                    class="btn-primary relative group"
+                    :class="{ 'opacity-60 cursor-not-allowed filter blur-[1px]': !canCreateCompetence }"
+                  >
+                    <div v-if="!canCreateCompetence" class="absolute -top-2 -right-2 w-7 h-7 bg-red-500 rounded-full flex items-center justify-center shadow-lg z-10">
+                      <span class="text-white text-sm">🔒</span>
+                    </div>
+                    <div v-if="!canCreateCompetence" class="absolute inset-0 bg-gray-500/15 backdrop-blur-[1px] rounded-xl pointer-events-none"></div>
+                    <span class="mr-2">➕</span>
+                    Ajouter une Compétence
+                  </button>
+                  <button 
+                    v-if="userLimits?.isPremium"
+                    @click="handleExportClick"
+                    :disabled="exportLoading"
+                    class="btn-secondary"
+                  >
+                    <span class="mr-2">📊</span>
+                    {{ exportLoading ? 'Export...' : 'Exporter Excel' }}
+                  </button>
+                  <router-link to="/projets" class="btn-primary">
+                    <span class="mr-2">🚀</span>
+                    Voir Projets
+                  </router-link>
+                </template>
+                
+                <!-- Mobile Buttons -->
+                <template #mobile-buttons>
+                  <button 
+                    @click="handleAddCompetenceClick"
+                    class="w-full btn-primary h-12 px-4 text-sm font-semibold flex items-center justify-center relative group transition-all duration-300"
+                    :class="{ 'opacity-60 cursor-not-allowed filter blur-[1px]': !canCreateCompetence }"
+                  >
+                    <div v-if="!canCreateCompetence" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-lg z-10">
+                      <span class="text-white text-xs">🔒</span>
+                    </div>
+                    <span class="mr-2">➕</span>
+                    Ajouter une Compétence
+                  </button>
+                  
+                  <button 
+                    v-if="userLimits?.isPremium"
+                    @click="handleExportClick"
+                    :disabled="exportLoading"
+                    class="w-full btn-secondary h-12 px-4 text-sm font-semibold flex items-center justify-center"
+                  >
+                    <span class="mr-2">📊</span>
+                    {{ exportLoading ? 'Export...' : 'Exporter Excel' }}
+                  </button>
+                  
+                  <router-link to="/projets" class="w-full btn-primary h-12 px-4 text-sm font-semibold flex items-center justify-center">
+                    <span class="mr-2">🚀</span>
+                    Voir Projets
+                  </router-link>
+                </template>
+              </MobileActionMenu>
+              
+              <!-- Non-authenticated user buttons -->
+              <div v-else class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button 
+                  @click="openAuthModal"
+                  class="btn-primary w-full sm:w-auto"
+                >
+                  <span class="mr-2">🔑</span>
+                  Se connecter
+                </button>
+                <router-link to="/projets" class="btn-primary w-full sm:w-auto">
+                  <span class="mr-2">🚀</span>
+                  Voir Projets
+                </router-link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modals -->
+    <CompetenceModal
+      v-if="showCompetenceModal"
+      :competence="selectedCompetence"
+      @save="saveCompetence"
+      @close="closeCompetenceModal"
+    />
+
+    <ApprentissageModal
+      v-if="showApprentissageModal"
+      :apprentissage="selectedApprentissage"
+      :competences="competences"
+      :projets="projets"
+      :categories="categories"
+      @save="saveApprentissage"
+      @close="closeApprentissageModal"
+    />
+
+    <CategoryModal
+      v-if="showCategoryModal"
+      :category="selectedCategory"
+      :competence-id="categoryModalData.competenceId"
+      :level="categoryModalData.level"
+      :competence-title="categoryModalData.competenceTitle"
+      @save="saveCategory"
+      @close="closeCategoryModal"
+    />
+
+    <ApprentissageViewModal
+      v-if="showViewModal && selectedViewApprentissage"
+      :apprentissage="selectedViewApprentissage"
+      :competences="competences"
+      @close="closeViewModal"
+      @edit="openEditApprentissageModal"
+      @open-project="openProjectFromApprentissage"
+    />
+
+    <ProjectModal
+      v-if="showProjectModal && selectedProject"
+      :project="selectedProject"
+      :competences="competences"
+      @close="closeProjectModal"
+    />
+
+    <ConfirmModal
+      v-if="showConfirmModal"
+      :title="confirmModalData.title"
+      :message="confirmModalData.message"
+      @confirm="confirmAction"
+      @cancel="cancelAction"
+    />
+
+    <LoginRequiredModal
+      v-if="showLoginRequiredModal"
+      @close="closeLoginRequiredModal"
+      @login="handleLoginFromModal"
+    />
+
+    <LimitModal
+      v-if="showLimitModal"
+      @close="closeLimitModal"
+    />
+
+    <ToastNotification
+      v-if="showToastNotification"
+      :title="toastData.title"
+      :message="toastData.message"
+      :duration="3000"
+      @close="closeToast"
+    />
+
+    <DuplicateModal
+      v-if="showDuplicateModal.show"
+      :title="showDuplicateModal.title"
+      :message="showDuplicateModal.message"
+      @close="showDuplicateModal.show = false"
+      @edit-existing="editExistingItem"
+    />
+
+    <TrophyModal
+      v-if="showTrophyModal"
+      :new-trophies="newTrophies"
+      :current-level="currentLevel"
+      :total-points="0"
+      @close="closeTrophyModal"
+    />
+
+    <!-- Drag and Drop Status Messages -->
+    <div v-if="saveError" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 glass-card p-4 border border-red-400/30">
+      <div class="flex items-center space-x-3">
+        <span class="text-red-400">❌</span>
+        <span class="text-white text-sm">{{ saveError }}</span>
+      </div>
+    </div>
+
+    <div v-if="saveSuccess" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 glass-card p-4 border border-green-400/30">
+      <div class="flex items-center space-x-3">
+        <span class="text-green-400">✅</span>
+        <span class="text-white text-sm">{{ saveSuccess }}</span>
+      </div>
+    </div>
+
+    <!-- Floating Back to Top Button -->
+    <button 
+      @click="scrollToTop"
+      class="fixed bottom-8 right-8 glass-card p-4 hover:scale-110 transition-all duration-300 z-50"
+    >
+      <ChevronDownIcon class="w-6 h-6 text-accent-400 transform rotate-180" />
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { MagnifyingGlassIcon, PlusIcon, PencilIcon, TrashIcon, ArrowDownTrayIcon } from '@heroicons/vue/24/outline'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { ChevronDownIcon } from '@heroicons/vue/24/outline'
 import CompetenceSection from '../components/CompetenceSection.vue'
-import ApprentissageModal from '../components/ApprentissageModal.vue'
-import ApprentissageViewModal from '../components/ApprentissageViewModal.vue'
-import ConfirmModal from '../components/ConfirmModal.vue'
-import ProjectModal from '../components/ProjectModal.vue'
 import CompetenceModal from '../components/CompetenceModal.vue'
-import LimitModal from '../components/LimitModal.vue'
-import DuplicateModal from '../components/DuplicateModal.vue'
-import LimitCounter from '../components/LimitCounter.vue'
-import PremiumLimitModal from '../components/PremiumLimitModal.vue'
-import PremiumNotification from '../components/PremiumNotification.vue'
+import ApprentissageModal from '../components/ApprentissageModal.vue'
 import CategoryModal from '../components/CategoryModal.vue'
+import ApprentissageViewModal from '../components/ApprentissageViewModal.vue'
+import ProjectModal from '../components/ProjectModal.vue'
+import ConfirmModal from '../components/ConfirmModal.vue'
+import LimitCounter from '../components/LimitCounter.vue'
+import LoginRequiredModal from '../components/LoginRequiredModal.vue'
+import LimitModal from '../components/LimitModal.vue'
+import ToastNotification from '../components/ToastNotification.vue'
+import DuplicateModal from '../components/DuplicateModal.vue'
 import TrophyModal from '../components/TrophyModal.vue'
-import ButProgramsDropdown from '../components/ButProgramsDropdown.vue'
 import MobileActionMenu from '../components/MobileActionMenu.vue'
-import { exportPortfolioToExcel, prepareExportData } from '../lib/excelExport'
-import { type Competence, type Apprentissage, type Projet } from '../data/portfolio'
-import { authService, exampleDataService, competenceService, apprentissageService, projetService, profileService, apprentissageCategoryService } from '../lib/supabase'
-import { featuredApprentissageService } from '../lib/supabase'
+import DragDropZone from '../components/DragDropZone.vue'
+import { authService, exampleDataService, competenceService, apprentissageService, projetService, profileService } from '../lib/supabase'
+import { featuredApprentissageService, apprentissageCategoryService } from '../lib/supabase'
 import { usePremiumLimits } from '../composables/usePremiumLimits'
-import { useGamification } from '../composables/useGamification'
 import { useAuth } from '../composables/useAuth'
+import { useGamification } from '../composables/useGamification'
+import { useDragDrop } from '../composables/useDragDrop'
+import { exportPortfolioToExcel, prepareExportData } from '../lib/excelExport'
+import type { Competence, Apprentissage, Projet } from '../data/portfolio'
 
-const route = useRoute()
 const router = useRouter()
+const route = useRoute()
 const { openAuthModal } = useAuth()
 
-const searchTerm = ref('')
-const selectedCompetenceFilter = ref('')
-const sortBy = ref('default')
-const filterFeatured = ref('')
-const showModal = ref(false)
-const showViewModal = ref(false)
-const showConfirmModal = ref(false)
-const showProjectModal = ref(false)
-const selectedApprentissage = ref<Apprentissage | null>(null)
-const viewApprentissage = ref<Apprentissage | null>(null)
-const selectedProject = ref<Projet | null>(null)
+// Drag and Drop
+const {
+  isDragging,
+  isSaving,
+  saveError,
+  saveSuccess
+} = useDragDrop()
+
+// State
+const competences = ref<Competence[]>([])
+const apprentissages = ref<Apprentissage[]>([])
+const projets = ref<Projet[]>([])
+const categories = ref<any[]>([])
+const featuredApprentissages = ref<string[]>([])
+const isAuthenticated = ref(false)
+const userProfile = ref<any>(null)
+
+// Modal states
 const showCompetenceModal = ref(false)
-const selectedCompetenceForModal = ref<Competence | null>(null)
-const apprentissageToDelete = ref<string | null>(null)
-const showCompetenceConfirmModal = ref(false)
-const competenceToDelete = ref<string | null>(null)
+const selectedCompetence = ref<Competence | null>(null)
+const showApprentissageModal = ref(false)
+const selectedApprentissage = ref<Apprentissage | null>(null)
+const showCategoryModal = ref(false)
+const selectedCategory = ref<any>(null)
+const categoryModalData = ref({ competenceId: '', level: 1, competenceTitle: '' })
+const showViewModal = ref(false)
+const selectedViewApprentissage = ref<Apprentissage | null>(null)
+const showProjectModal = ref(false)
+const selectedProject = ref<any>(null)
+const showConfirmModal = ref(false)
+const confirmModalData = ref({ title: '', message: '', action: null as (() => void) | null })
+const showLoginRequiredModal = ref(false)
 const showLimitModal = ref(false)
+const showToastNotification = ref(false)
+const toastData = ref({ title: '', message: '' })
 const showDuplicateModal = ref({
   show: false,
   title: '',
   message: '',
   existingItem: null
 })
-const competences = ref<Competence[]>([])
-const apprentissages = ref<Apprentissage[]>([])
-const projets = ref<Projet[]>([])
-const featuredApprentissages = ref<string[]>([])
-const categories = ref<any[]>([])
+const exportLoading = ref(false)
 
-const isAuthenticated = ref(false)
-
-const { userLimits, loadUserLimits, canCreate, incrementCount, incrementCountBy, decrementCount, decrementCountBy, checkLimit } = usePremiumLimits()
+// Premium limits
+const { userLimits, loadUserLimits, canCreate, incrementCount, decrementCount } = usePremiumLimits()
 
 // Gamification
 const { 
@@ -409,211 +426,146 @@ const {
   closeTrophyModal
 } = useGamification()
 
-const showPremiumModal = ref(false)
-const premiumModalType = ref<'competences' | 'apprentissages' | 'projets' | 'export'>('competences')
-const showPremiumNotification = ref(false)
-const premiumNotificationData = ref({ title: '', message: '' })
-const exportLoading = ref(false)
-const userProfile = ref<any>(null)
-const showCategoryModal = ref(false)
-const selectedCategory = ref<any>(null)
-const categoryCompetenceId = ref('')
-const categoryLevel = ref(1)
-const showCategoryConfirmModal = ref(false)
-const categoryToDelete = ref<string | null>(null)
-
 const canCreateCompetence = computed(() => canCreate.value.competences)
 const canCreateApprentissage = computed(() => canCreate.value.apprentissages)
 
-// Check authentication status
+// Initialize data
 onMounted(async () => {
+  await checkAuthAndLoadData()
+  
+  // Listen for drag and drop events
+  window.addEventListener('category-moved', handleCategoryMoved)
+  window.addEventListener('apprentissage-moved', handleApprentissageMoved)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('category-moved', handleCategoryMoved)
+  window.removeEventListener('apprentissage-moved', handleApprentissageMoved)
+})
+
+// Event handlers for drag and drop
+const handleCategoryMoved = async (event: CustomEvent) => {
+  const { categoryId, newCompetenceId, newLevel } = event.detail
+  console.log('🔄 Category moved event received:', { categoryId, newCompetenceId, newLevel })
+  
+  // Reload categories to reflect the change
+  await loadCategories()
+  
+  showToast({
+    title: 'Apprentissage critique déplacé',
+    message: 'L\'apprentissage critique a été déplacé avec succès.'
+  })
+}
+
+const handleApprentissageMoved = async (event: CustomEvent) => {
+  const { apprentissageId, newCompetenceId, newLevel, newCategoryId } = event.detail
+  console.log('🔄 Apprentissage moved event received:', { apprentissageId, newCompetenceId, newLevel, newCategoryId })
+  
+  // Reload apprentissages to reflect the change
+  await loadApprentissages()
+  
+  showToast({
+    title: 'Apprentissage déplacé',
+    message: 'L\'apprentissage a été déplacé avec succès.'
+  })
+}
+
+const checkAuthAndLoadData = async () => {
   const user = await authService.getCurrentUser()
   isAuthenticated.value = !!user
   
-  // Load user limits immediately if authenticated
-  if (isAuthenticated.value) {
+  if (isAuthenticated.value && user) {
     await loadUserLimits()
     await loadGamificationStats()
-  }
-  
-  // Load data based on authentication status
-  if (isAuthenticated.value) {
-    await loadUserData()
+    await loadUserData(user.id)
   } else {
     await loadExampleData()
   }
   
-  // Check if we need to scroll to a specific competence
+  // Check if we need to open a specific competence or apprentissage
   const competenceParam = route.query.competence as string
   const apprentissageParam = route.query.apprentissage as string
   
-  if (competenceParam) {
-    selectedCompetenceFilter.value = competenceParam
-    setTimeout(() => {
-      const element = document.getElementById(`competence-${competenceParam}`)
-      element?.scrollIntoView({ behavior: 'smooth' })
-      
-      // If specific apprentissage is requested, open its modal
-      if (apprentissageParam) {
-        const apprentissage = apprentissages.value.find(a => a.id === apprentissageParam)
-        if (apprentissage) {
-          setTimeout(() => {
-            openViewModal(apprentissage)
-          }, 500)
-        }
-      }
-    }, 100)
-  }
-})
-
-const loadUserData = async () => {
-  const user = await authService.getCurrentUser()
-  if (!user) return
-  
-  // Load profile
-  const { data: profile } = await profileService.getProfile(user.id)
-  if (profile) {
-    userProfile.value = profile
-  }
-  
-  // Load user's competences - start with empty array for new users
-  competences.value = []
-  
-  // Load competences from database (includes user's custom + public ones)
-  const { data: userCompetences } = await competenceService.getCompetences()
-  if (userCompetences && userCompetences.length > 0) {
-    competences.value = userCompetences
-  }
-  
-  // Migrate localStorage competences to database if they exist
-  const savedCompetences = localStorage.getItem('user_competences')
-  if (savedCompetences) {
-    try {
-      const parsedCompetences = JSON.parse(savedCompetences)
-      if (Array.isArray(parsedCompetences) && parsedCompetences.length > 0) {
-        // Migrate each competence to database
-        for (const comp of parsedCompetences) {
-          // Check if competence already exists in database
-          const existsInDatabase = competences.value.some(existing => existing.id === comp.id)
-          if (!existsInDatabase) {
-            try {
-              await competenceService.createCompetence(comp)
-            } catch (error) {
-              console.warn('Competence migration failed:', comp.id, error)
-            }
-          }
-        }
-        // Clear localStorage after successful migration
-        localStorage.removeItem('user_competences')
-        // Reload competences from database
-        const { data: updatedCompetences } = await competenceService.getCompetences()
-        if (updatedCompetences) {
-          competences.value = updatedCompetences
-        }
-      }
-    } catch (error) {
-      console.error('Error parsing saved competences:', error)
+  if (competenceParam && apprentissageParam) {
+    const apprentissage = apprentissages.value.find(a => a.id === apprentissageParam)
+    if (apprentissage) {
+      setTimeout(() => {
+        openViewApprentissageModal(apprentissage)
+      }, 500)
     }
-  }
-  
-  const { data: userApprentissages } = await apprentissageService.getUserApprentissages(user.id)
-  const { data: userProjets } = await projetService.getUserProjets(await authService.getCurrentUser().then(u => u?.id || ''))
-  
-  if (userApprentissages) {
-    apprentissages.value = userApprentissages.map(app => ({
-      id: app.id,
-      competenceId: app.competence_id,
-      level: app.level,
-      title: app.title,
-      description: app.description,
-      evaluation: app.evaluation,
-      argumentaire: app.argumentaire,
-      categoryId: app.category_id,
-      preuves: app.preuves?.map(preuve => ({
-        id: preuve.id,
-        titre: preuve.titre,
-        type: preuve.type as 'Rapport' | 'Code' | 'Projet' | 'Présentation' | 'Documentation' | 'Autre',
-        url: preuve.url,
-        projetId: preuve.projet_id
-      })) || [],
-      dateCreation: app.created_at,
-      dateModification: app.updated_at
-    }))
-    
-  }
-  if (userProjets) projets.value = userProjets
-  
-  // Load featured apprentissages
-  const { data: featured } = await featuredApprentissageService.getFeaturedApprentissages(user.id)
-  if (featured) {
-    featuredApprentissages.value = featured.map(f => f.apprentissage_id)
-  }
-  
-  // Load categories
-  const { data: userCategories } = await apprentissageCategoryService.getUserCategories(user.id)
-  if (userCategories) {
-    categories.value = userCategories
   }
 }
 
-const loadExampleData = async () => {
+const loadUserData = async (userId: string) => {
+  await Promise.all([
+    loadCompetences(userId),
+    loadApprentissages(userId),
+    loadProjets(userId),
+    loadCategories(userId),
+    loadFeaturedApprentissages(userId),
+    loadUserProfile(userId)
+  ])
+}
+
+const loadCompetences = async (userId?: string) => {
   try {
-    // Load example data for non-authenticated users
-    const { data: exampleCompetences } = await exampleDataService.getExampleCompetences()
-    const { data: exampleApprentissages } = await exampleDataService.getExampleApprentissages()
-    const { data: exampleProjets } = await exampleDataService.getExampleProjets()
-    
-    if (exampleCompetences && exampleCompetences.length > 0) {
-      competences.value = exampleCompetences.map(comp => ({
-        id: comp.id,
-        title: comp.title,
-        subtitle: comp.subtitle,
-        description: comp.description,
-        levels: comp.levels,
-        color: comp.color as 'primary' | 'accent',
-        icon: comp.icon
-      }))
-    } else {
-      // Fallback competences data
-      competences.value = [
-        {
-          id: 'concevoir',
-          title: 'Concevoir',
-          subtitle: 'Conception de systèmes',
-          description: 'Concevoir l\'architecture matérielle et logicielle d\'un système',
-          levels: 3,
-          color: 'primary' as const,
-          icon: '🎯'
-        }
-      ]
+    const { data } = await competenceService.getCompetences()
+    if (data) {
+      competences.value = userId 
+        ? data.filter(c => c.user_id === userId || c.user_id === null)
+        : data.filter(c => c.user_id === null)
     }
-    
-    if (exampleApprentissages && exampleApprentissages.length > 0) {
-      apprentissages.value = exampleApprentissages.map(app => ({
-        id: app.id,
-        competenceId: app.competence_id,
-        level: app.level,
-        title: app.title,
-        description: app.description,
-        evaluation: app.evaluation as 'Bien Maîtrisé' | 'Partiellement Maîtrisé' | 'Pas Maîtrisé',
-        argumentaire: app.argumentaire,
-        categoryId: app.category_id,
-        preuves: app.example_preuves?.map((preuve: any) => ({
-          id: preuve.id,
-          titre: preuve.titre,
-          type: preuve.type as 'Rapport' | 'Code' | 'Projet' | 'Présentation' | 'Documentation' | 'Autre',
-          url: preuve.url,
-          projetId: preuve.projet_id
-        })) || [],
-        dateCreation: app.created_at,
-        dateModification: app.created_at
-      }))
+  } catch (error) {
+    console.error('Error loading competences:', error)
+  }
+}
+
+const loadApprentissages = async (userId?: string) => {
+  try {
+    if (userId) {
+      const { data } = await apprentissageService.getUserApprentissages(userId)
+      if (data) {
+        apprentissages.value = data.map(app => ({
+          id: app.id,
+          competenceId: app.competence_id,
+          level: app.level,
+          title: app.title,
+          description: app.description,
+          evaluation: app.evaluation,
+          argumentaire: app.argumentaire,
+          preuves: app.preuves || [],
+          dateCreation: app.created_at,
+          dateModification: app.updated_at,
+          categoryId: app.category_id
+        }))
+      }
     } else {
-      apprentissages.value = []
+      const { data } = await exampleDataService.getExampleApprentissages()
+      if (data) {
+        apprentissages.value = data.map(app => ({
+          id: app.id,
+          competenceId: app.competence_id,
+          level: app.level,
+          title: app.title,
+          description: app.description,
+          evaluation: app.evaluation,
+          argumentaire: app.argumentaire,
+          preuves: app.example_preuves || [],
+          dateCreation: app.created_at,
+          dateModification: app.created_at
+        }))
+      }
     }
-    
-    if (exampleProjets && exampleProjets.length > 0) {
-      projets.value = exampleProjets.map(projet => ({
+  } catch (error) {
+    console.error('Error loading apprentissages:', error)
+  }
+}
+
+const loadProjets = async (userId: string) => {
+  try {
+    const { data } = await projetService.getUserProjets(userId)
+    if (data) {
+      projets.value = data.map(projet => ({
         id: projet.id,
         titre: projet.titre,
         description: projet.description,
@@ -622,124 +574,131 @@ const loadExampleData = async () => {
         duree: projet.duree,
         fonctionnalites: projet.fonctionnalites || [],
         technologies: projet.technologies || [],
-        fichiers: [],
+        competences_developpees: projet.competences_developpees || [],
+        fichiers: projet.fichiers_projets || [],
         dateCreation: projet.created_at,
-        statut: projet.statut as 'En cours' | 'Terminé' | 'Archivé'
+        statut: projet.statut
       }))
-    } else {
-      projets.value = []
+    }
+  } catch (error) {
+    console.error('Error loading projets:', error)
+  }
+}
+
+const loadCategories = async (userId?: string) => {
+  try {
+    if (userId) {
+      const { data } = await apprentissageCategoryService.getUserCategories(userId)
+      if (data) {
+        categories.value = data
+      }
+    }
+  } catch (error) {
+    console.error('Error loading categories:', error)
+  }
+}
+
+const loadFeaturedApprentissages = async (userId: string) => {
+  try {
+    const { data } = await featuredApprentissageService.getFeaturedApprentissages(userId)
+    if (data) {
+      featuredApprentissages.value = data.map(f => f.apprentissage_id)
+    }
+  } catch (error) {
+    console.error('Error loading featured apprentissages:', error)
+  }
+}
+
+const loadUserProfile = async (userId: string) => {
+  try {
+    const { data } = await profileService.getProfile(userId)
+    if (data) {
+      userProfile.value = data
+    }
+  } catch (error) {
+    console.error('Error loading user profile:', error)
+  }
+}
+
+const loadExampleData = async () => {
+  try {
+    const [competencesResult, apprentissagesResult] = await Promise.all([
+      exampleDataService.getExampleCompetences(),
+      exampleDataService.getExampleApprentissages()
+    ])
+
+    if (competencesResult.data) {
+      competences.value = competencesResult.data
+    }
+
+    if (apprentissagesResult.data) {
+      apprentissages.value = apprentissagesResult.data.map(app => ({
+        id: app.id,
+        competenceId: app.competence_id,
+        level: app.level,
+        title: app.title,
+        description: app.description,
+        evaluation: app.evaluation,
+        argumentaire: app.argumentaire,
+        preuves: app.example_preuves || [],
+        dateCreation: app.created_at,
+        dateModification: app.created_at
+      }))
     }
   } catch (error) {
     console.error('Error loading example data:', error)
-    // Set empty arrays as fallback
-    competences.value = []
-    apprentissages.value = []
-    projets.value = []
   }
 }
-const requireAuth = (action: () => void) => {
-  if (!isAuthenticated.value) {
-    alert('Vous devez être connecté pour effectuer cette action.')
-    router.push('/')
-    return
-  }
-  action();
-}
 
-const filteredCompetences = computed(() => {
-  let filtered = competences.value
-
-  if (selectedCompetenceFilter.value) {
-    filtered = filtered.filter(comp => comp.id === selectedCompetenceFilter.value)
-  }
-
-  // Apply search filter
-  if (searchTerm.value) {
-    const searchLower = searchTerm.value.toLowerCase()
-    filtered = filtered.filter(comp => 
-      comp.title.toLowerCase().includes(searchLower) ||
-      comp.subtitle.toLowerCase().includes(searchLower) ||
-      comp.description.toLowerCase().includes(searchLower)
-    )
-  }
-
-  // If filtering by featured, only show competences that have featured apprentissages
-  if (filterFeatured.value === 'featured') {
-    filtered = filtered.filter(comp => {
-      const competenceApprentissages = apprentissages.value.filter(app => app.competenceId === comp.id)
-      return competenceApprentissages.some(app => featuredApprentissages.value.includes(app.id))
-    })
-  }
-
-  // Apply sorting
-  if (sortBy.value === 'title') {
-    filtered.sort((a, b) => a.title.localeCompare(b.title))
-  } else if (sortBy.value === 'recent') {
-    // Sort by most recent apprentissages in each competence
-    filtered.sort((a, b) => {
-      const aLatest = getLatestApprentissageDate(a.id)
-      const bLatest = getLatestApprentissageDate(b.id)
-      return new Date(bLatest).getTime() - new Date(aLatest).getTime()
-    })
-  }
-
-  return filtered
-})
-
+// Helper functions
 const getApprentissagesForCompetence = (competenceId: string) => {
-  let filtered = apprentissages.value.filter(app => {
-    const matchesCompetence = app.competenceId === competenceId
-    
-    // Search is now handled at competence level, so we don't filter apprentissages here
-    // unless we want to search within apprentissages of visible competences
-    let matchesSearch = true
-    if (searchTerm.value && !selectedCompetenceFilter.value) {
-      // Only apply apprentissage search if no specific competence is selected
-      const searchLower = searchTerm.value.toLowerCase()
-      matchesSearch = app.title.toLowerCase().includes(searchLower) ||
-        app.description.toLowerCase().includes(searchLower) ||
-        app.argumentaire.toLowerCase().includes(searchLower)
-    }
-    
-    // Apply featured filter
-    let matchesFeatured = true
-    if (filterFeatured.value === 'featured') {
-      matchesFeatured = featuredApprentissages.value.includes(app.id)
-    } else if (filterFeatured.value === 'not-featured') {
-      matchesFeatured = !featuredApprentissages.value.includes(app.id)
-    }
-    
-    return matchesCompetence && matchesSearch && matchesFeatured
-  })
-  
-  // Apply sorting
-  if (sortBy.value === 'title' || sortBy.value === 'default') {
-    filtered.sort((a, b) => a.title.localeCompare(b.title))
-  } else if (sortBy.value === 'recent') {
-    filtered.sort((a, b) => new Date(b.dateModification).getTime() - new Date(a.dateModification).getTime())
-  } else if (sortBy.value === 'evaluation') {
-    const evaluationOrder = { 'Bien Maîtrisé': 3, 'Partiellement Maîtrisé': 2, 'Pas Maîtrisé': 1 }
-    filtered.sort((a, b) => evaluationOrder[b.evaluation] - evaluationOrder[a.evaluation])
-  } else if (sortBy.value === 'level') {
-    filtered.sort((a, b) => a.level - b.level)
-  }
-  
-  return filtered
+  return apprentissages.value.filter(a => a.competenceId === competenceId)
 }
 
-const openAddModal = (competenceId: string, level: number) => {
+// Modal handlers
+const openAddCompetenceModal = () => {
   if (!isAuthenticated.value) {
-    router.push('/')
-    openAuthModal()
+    showLoginRequiredModal.value = true
+    return
+  }
+  
+  if (!canCreateCompetence.value) {
+    showToast({
+      title: 'Limite atteinte - Premium requis',
+      message: `Vous avez atteint la limite de ${userLimits.value?.limits.competences || 3} compétences. Achetez Premium pour créer des compétences illimitées.`
+    })
+    return
+  }
+  
+  selectedCompetence.value = null
+  showCompetenceModal.value = true
+}
+
+const handleAddCompetenceClick = () => {
+  openAddCompetenceModal()
+}
+
+const openEditCompetenceModal = (competence: Competence) => {
+  selectedCompetence.value = competence
+  showCompetenceModal.value = true
+}
+
+const closeCompetenceModal = () => {
+  showCompetenceModal.value = false
+  selectedCompetence.value = null
+}
+
+const openAddApprentissageModal = (competenceId: string, level: number, categoryId?: string) => {
+  if (!isAuthenticated.value) {
+    showLoginRequiredModal.value = true
     return
   }
   
   if (!canCreateApprentissage.value) {
-    showPremiumNotification.value = true
-    premiumNotificationData.value = {
+    showToast({
       title: 'Limite atteinte - Premium requis',
-      message: `Vous avez atteint la limite de ${userLimits.value?.limits.apprentissages || 5} apprentissages. Achetez FolioLink Premium pour créer des apprentissages illimités.`
-    }
+      message: `Vous avez atteint la limite de ${userLimits.value?.limits.apprentissages || 5} apprentissages. Achetez Premium pour créer des apprentissages illimités.`
+    })
     return
   }
   
@@ -752,111 +711,147 @@ const openAddModal = (competenceId: string, level: number) => {
     evaluation: 'Pas Maîtrisé',
     argumentaire: '',
     preuves: [],
-    dateCreation: new Date().toISOString(),
-    dateModification: new Date().toISOString()
+    dateCreation: '',
+    dateModification: '',
+    categoryId
   }
-  showModal.value = true
+  showApprentissageModal.value = true
 }
 
-// Overloaded function to handle category assignment
-const openAddModalWithCategory = (competenceId: string, level: number, categoryId?: string) => {
+const openEditApprentissageModal = (apprentissage: Apprentissage) => {
+  selectedApprentissage.value = apprentissage
+  showApprentissageModal.value = true
+}
+
+const closeApprentissageModal = () => {
+  showApprentissageModal.value = false
+  selectedApprentissage.value = null
+}
+
+const openAddCategoryModal = (competenceId: string, level: number) => {
   if (!isAuthenticated.value) {
-    router.push('/')
-    openAuthModal()
+    showLoginRequiredModal.value = true
     return
   }
   
-  if (!canCreateApprentissage.value) {
-    showPremiumNotification.value = true
-    premiumNotificationData.value = {
-      title: 'Limite atteinte - Premium requis',
-      message: `Vous avez atteint la limite de ${userLimits.value?.limits.apprentissages || 5} apprentissages. Achetez FolioLink Premium pour créer des apprentissages illimités.`
-    }
-    return
-  }
-  
-  selectedApprentissage.value = {
-    id: '',
+  const competence = competences.value.find(c => c.id === competenceId)
+  categoryModalData.value = {
     competenceId,
     level,
-    title: '',
-    description: '',
-    evaluation: 'Pas Maîtrisé',
-    argumentaire: '',
-    preuves: [],
-    dateCreation: new Date().toISOString(),
-    dateModification: new Date().toISOString(),
-    categoryId: categoryId
+    competenceTitle: competence?.title || 'Compétence'
   }
-  showModal.value = true
+  selectedCategory.value = null
+  showCategoryModal.value = true
 }
 
-const handleAddApprentissageClick = (competenceId: string, level: number) => {
-  if (!canCreateApprentissage.value) {
-    showPremiumNotification.value = true
-    premiumNotificationData.value = {
-      title: 'Limite atteinte - Premium requis',
-      message: `Vous avez atteint la limite de ${userLimits.value?.limits.apprentissages || 5} apprentissages. Achetez FolioLink Premium pour créer des apprentissages illimités.`
-    }
-    return
+const openEditCategoryModal = (category: any) => {
+  const competence = competences.value.find(c => c.id === category.competence_id)
+  categoryModalData.value = {
+    competenceId: category.competence_id,
+    level: category.level,
+    competenceTitle: competence?.title || 'Compétence'
   }
-  openAddModal(competenceId, level)
+  selectedCategory.value = category
+  showCategoryModal.value = true
 }
 
-// New handler for apprentissage with optional category
-const handleAddApprentissageWithCategory = (competenceId: string, level: number, categoryId?: string) => {
-  if (!canCreateApprentissage.value) {
-    showPremiumNotification.value = true
-    premiumNotificationData.value = {
-      title: 'Limite atteinte - Premium requis',
-      message: `Vous avez atteint la limite de ${userLimits.value?.limits.apprentissages || 5} apprentissages. Achetez FolioLink Premium pour créer des apprentissages illimités.`
-    }
-    return
-  }
-  
-  if (categoryId) {
-    openAddModalWithCategory(competenceId, level, categoryId)
-  } else {
-    openAddModal(competenceId, level)
-  }
+const closeCategoryModal = () => {
+  showCategoryModal.value = false
+  selectedCategory.value = null
 }
 
-const openEditModal = (apprentissage: Apprentissage) => {
-  requireAuth(() => {
-    selectedApprentissage.value = { ...apprentissage }
-    showModal.value = true
-  })
-}
-
-const openViewModal = (apprentissage: Apprentissage) => {
-  viewApprentissage.value = apprentissage
+const openViewApprentissageModal = (apprentissage: Apprentissage) => {
+  selectedViewApprentissage.value = apprentissage
   showViewModal.value = true
 }
 
 const closeViewModal = () => {
   showViewModal.value = false
-  viewApprentissage.value = null
+  selectedViewApprentissage.value = null
 }
 
-const editFromView = () => {
-  requireAuth(() => {
-    if (viewApprentissage.value) {
-      const apprentissageToEdit = { ...viewApprentissage.value }
-      closeViewModal()
-      openEditModal(apprentissageToEdit)
+const openProjectFromApprentissage = (projetId: string) => {
+  const projet = projets.value.find(p => p.id === projetId)
+  if (projet) {
+    selectedProject.value = {
+      id: projet.id,
+      title: projet.titre,
+      description: projet.description,
+      technologies: projet.technologies || [],
+      objectifs: ['Objectifs à définir'],
+      realisations: projet.fonctionnalites || [],
+      competences: [],
+      duree: projet.duree,
+      niveau: projet.niveau,
+      fichiers: projet.fichiers || []
     }
-  })
+    showProjectModal.value = true
+  }
 }
 
-const closeModal = () => {
-  showModal.value = false
-  selectedApprentissage.value = null
+const closeProjectModal = () => {
+  showProjectModal.value = false
+  selectedProject.value = null
 }
 
-const saveApprentissage = (apprentissage: Apprentissage) => {
+const closeLoginRequiredModal = () => {
+  showLoginRequiredModal.value = false
+}
+
+const handleLoginFromModal = () => {
+  showLoginRequiredModal.value = false
+  openAuthModal()
+}
+
+const closeLimitModal = () => {
+  showLimitModal.value = false
+}
+
+// CRUD operations
+const saveCompetence = async (competence: Competence) => {
   if (!isAuthenticated.value) return
   
-  // Vérifier les doublons
+  try {
+    if (competence.id && competences.value.find(c => c.id === competence.id)) {
+      // Update existing competence
+      const { data, error } = await competenceService.updateCompetence(competence.id, competence)
+      if (!error && data) {
+        const index = competences.value.findIndex(c => c.id === competence.id)
+        if (index !== -1) {
+          competences.value[index] = data
+        }
+        showToast({
+          title: 'Compétence modifiée',
+          message: 'La compétence a été mise à jour avec succès.'
+        })
+      }
+    } else {
+      // Create new competence
+      const { data, error } = await competenceService.createCompetence(competence)
+      if (!error && data) {
+        competences.value.push(data)
+        incrementCount('competences')
+        setTimeout(() => checkTrophies(), 1000)
+        showToast({
+          title: 'Compétence créée',
+          message: 'La nouvelle compétence a été ajoutée avec succès.'
+        })
+      }
+    }
+  } catch (error) {
+    console.error('Error saving competence:', error)
+    showToast({
+      title: 'Erreur',
+      message: 'Impossible de sauvegarder la compétence.'
+    })
+  }
+  closeCompetenceModal()
+}
+
+const saveApprentissage = async (apprentissage: Apprentissage) => {
+  if (!isAuthenticated.value) return
+  
+  // Check for duplicates
   const existingApprentissage = apprentissages.value.find(a => 
     a.title.toLowerCase() === apprentissage.title.toLowerCase() && 
     a.id !== apprentissage.id
@@ -872,327 +867,216 @@ const saveApprentissage = (apprentissage: Apprentissage) => {
     return
   }
   
-  if (apprentissage.id) {
-    // Update existing apprentissage
-    apprentissageService.updateApprentissage(apprentissage.id, {
-      competence_id: apprentissage.competenceId,
-      level: apprentissage.level,
-      title: apprentissage.title,
-      description: apprentissage.description,
-      evaluation: apprentissage.evaluation,
-      argumentaire: apprentissage.argumentaire,
-      category_id: apprentissage.categoryId,
-      preuves: apprentissage.preuves
-    }).then(({ data, error }) => {
+  try {
+    if (apprentissage.id) {
+      // Update existing apprentissage
+      const { data, error } = await apprentissageService.updateApprentissage(apprentissage.id, {
+        competence_id: apprentissage.competenceId,
+        level: apprentissage.level,
+        title: apprentissage.title,
+        description: apprentissage.description,
+        evaluation: apprentissage.evaluation,
+        argumentaire: apprentissage.argumentaire,
+        category_id: apprentissage.categoryId,
+        preuves: apprentissage.preuves
+      })
+      
       if (!error && data) {
         const index = apprentissages.value.findIndex(a => a.id === apprentissage.id)
         if (index !== -1) {
           apprentissages.value[index] = {
-            id: data.id,
-            competenceId: data.competence_id,
-            level: data.level,
-            title: data.title,
-            description: data.description,
-            evaluation: data.evaluation,
-            argumentaire: data.argumentaire,
-            categoryId: data.category_id,
-            preuves: apprentissage.preuves || [],
-            dateCreation: data.created_at,
-            dateModification: data.updated_at
+            ...apprentissage,
+            dateModification: new Date().toISOString()
           }
         }
+        showToast({
+          title: 'Apprentissage modifié',
+          message: 'L\'apprentissage a été mis à jour avec succès.'
+        })
       }
-    })
-  } else {
-    // Create new apprentissage
-    apprentissageService.createApprentissage({
-      competenceId: apprentissage.competenceId,
-      level: apprentissage.level,
-      title: apprentissage.title,
-      description: apprentissage.description,
-      evaluation: apprentissage.evaluation,
-      argumentaire: apprentissage.argumentaire,
-      categoryId: apprentissage.categoryId,
-      preuves: apprentissage.preuves
-    }).then(({ data, error }) => {
+    } else {
+      // Create new apprentissage
+      const { data, error } = await apprentissageService.createApprentissage(apprentissage)
       if (!error && data) {
-        const newApprentissage = {
+        apprentissages.value.push({
+          ...apprentissage,
           id: data.id,
-          competenceId: data.competence_id,
-          level: data.level,
-          title: data.title,
-          description: data.description,
-          evaluation: data.evaluation,
-          argumentaire: data.argumentaire,
-          categoryId: data.category_id,
-          preuves: apprentissage.preuves || [],
           dateCreation: data.created_at,
           dateModification: data.updated_at
-        }
-        apprentissages.value.unshift(newApprentissage)
-        // Update counter immediately
+        })
         incrementCount('apprentissages')
-        
-        // Check for new trophies
-        setTimeout(() => {
-          checkTrophies()
-        }, 1000)
+        setTimeout(() => checkTrophies(), 1000)
+        showToast({
+          title: 'Apprentissage créé',
+          message: 'Le nouvel apprentissage a été ajouté avec succès.'
+        })
       }
+    }
+  } catch (error) {
+    console.error('Error saving apprentissage:', error)
+    showToast({
+      title: 'Erreur',
+      message: 'Impossible de sauvegarder l\'apprentissage.'
     })
   }
-  closeModal()
+  closeApprentissageModal()
 }
 
-const deleteApprentissage = (id: string) => {
-  requireAuth(() => {
-    apprentissageToDelete.value = id
-    showConfirmModal.value = true
-  })
-}
-
-const confirmDelete = () => {
-  if (apprentissageToDelete.value && isAuthenticated.value) {
-    // Remove from UI immediately for better UX
-    const index = apprentissages.value.findIndex(a => a.id === apprentissageToDelete.value)
-    if (index !== -1) {
-      apprentissages.value.splice(index, 1)
-      // Update counter immediately
-      decrementCount('apprentissages')
-    }
-    
-    // Supprimer de la base de données
-    apprentissageService.deleteApprentissage(apprentissageToDelete.value).then(({ error }) => {
-      if (error) {
-        console.error('Erreur lors de la suppression:', error)
-        // Restore the item if deletion failed
-        if (index !== -1) {
-          apprentissages.value.splice(index, 0, apprentissages.value[index])
-          incrementCount('apprentissages')
-        }
-        alert('Erreur lors de la suppression de l\'apprentissage')
-      }
-      
-      // Supprimer aussi des apprentissages vedettes si présent
-      const featuredIndex = featuredApprentissages.value.indexOf(apprentissageToDelete.value!)
-      if (featuredIndex !== -1) {
-        featuredApprentissages.value.splice(featuredIndex, 1)
-      }
-    })
-    
-    // Close modal immediately
-    cancelDelete()
-  } else if (!isAuthenticated.value) {
-    // Pour les utilisateurs non connectés, suppression locale uniquement
-    const index = apprentissages.value.findIndex(a => a.id === apprentissageToDelete.value)
-    if (index !== -1) {
-      apprentissages.value.splice(index, 1)
-    }
-    cancelDelete()
-  }
-}
-
-const cancelDelete = () => {
-  showConfirmModal.value = false
-  apprentissageToDelete.value = null
-}
-
-const getLatestApprentissageDate = (competenceId: string) => {
-  const competenceApprentissages = apprentissages.value.filter(app => app.competenceId === competenceId)
-  if (competenceApprentissages.length === 0) return new Date(0).toISOString()
-  
-  return competenceApprentissages
-    .sort((a, b) => new Date(b.dateModification).getTime() - new Date(a.dateModification).getTime())[0]
-    .dateModification
-}
-
-
-const cancelDeleteCompetence = () => {
-  showCompetenceConfirmModal.value = false
-  competenceToDelete.value = null
-}
-
-const openAddCompetenceModal = () => {
-  handleAddCompetenceClick()
-}
-
-const handleAddCompetenceClick = () => {
-  if (!isAuthenticated.value) {
-    router.push('/')
-    openAuthModal()
-    return
-  }
-  
-  if (!canCreateCompetence.value) {
-    showPremiumNotification.value = true
-    premiumNotificationData.value = {
-      title: 'Limite atteinte - Premium requis',
-      message: `Vous avez atteint la limite de ${userLimits.value?.limits.competences || 3} compétences. Achetez Premium pour créer des compétences illimitées.`
-    }
-    return
-  }
-  
-  selectedCompetenceForModal.value = null
-  showCompetenceModal.value = true
-}
-
-const openEditCompetenceModal = (competence: Competence) => {
-  requireAuth(() => {
-    selectedCompetenceForModal.value = { ...competence }
-    showCompetenceModal.value = true
-  })
-}
-
-const closeCompetenceModal = () => {
-  showCompetenceModal.value = false
-  selectedCompetenceForModal.value = null
-}
-
-const saveCompetence = (competence: Competence) => {
+const saveCategory = async (category: any) => {
   if (!isAuthenticated.value) return
   
-  // Vérifier les doublons
-  const existingCompetence = competences.value.find(c => 
-    c.title.toLowerCase() === competence.title.toLowerCase() && 
-    c.id !== competence.id
-  )
-  
-  if (existingCompetence) {
-    showDuplicateModal.value = {
-      show: true,
-      title: 'Titre déjà existant',
-      message: 'Une compétence avec ce titre existe déjà.',
-      existingItem: existingCompetence
-    }
-    return
-  }
-  
-  if (competence.id && competences.value.find(c => c.id === competence.id)) {
-    // Update existing competence in database
-    competenceService.updateCompetence(competence.id, competence).then(({ data, error }) => {
+  try {
+    if (category.id) {
+      // Update existing category
+      const { data, error } = await apprentissageCategoryService.updateCategory(category.id, {
+        title: category.title,
+        description: category.description
+      })
       if (!error && data) {
-        const index = competences.value.findIndex(c => c.id === competence.id)
+        const index = categories.value.findIndex(c => c.id === category.id)
         if (index !== -1) {
-          competences.value[index] = data
+          categories.value[index] = data
         }
-      } else {
-        console.error('Error updating competence:', error)
-        alert('Erreur lors de la modification de la compétence')
+        showToast({
+          title: 'Apprentissage critique modifié',
+          message: 'L\'apprentissage critique a été mis à jour avec succès.'
+        })
       }
-    })
-  } else {
-    // Create new competence in database
-    competenceService.createCompetence(competence).then(({ data, error }) => {
+    } else {
+      // Create new category
+      const { data, error } = await apprentissageCategoryService.createCategory({
+        competenceId: category.competence_id,
+        level: category.level,
+        title: category.title,
+        description: category.description
+      })
       if (!error && data) {
-        competences.value.push(data)
-        // Update counter immediately
-        incrementCount('competences')
-        
-        // Check for new trophies
-        setTimeout(() => {
-          checkTrophies()
-        }, 1000)
-      } else {
-        console.error('Error creating competence:', error)
-        alert('Erreur lors de la création de la compétence')
+        categories.value.push(data)
+        showToast({
+          title: 'Apprentissage critique créé',
+          message: 'Le nouvel apprentissage critique a été ajouté avec succès.'
+        })
       }
+    }
+  } catch (error) {
+    console.error('Error saving category:', error)
+    showToast({
+      title: 'Erreur',
+      message: 'Impossible de sauvegarder l\'apprentissage critique.'
     })
   }
-  
-  closeCompetenceModal()
+  closeCategoryModal()
 }
 
+// Delete operations
 const deleteCompetence = (competenceId: string) => {
-  requireAuth(() => {
-    competenceToDelete.value = competenceId
-    showCompetenceConfirmModal.value = true
-  })
+  const competence = competences.value.find(c => c.id === competenceId)
+  if (competence) {
+    confirmModalData.value = {
+      title: 'Supprimer la compétence',
+      message: `Êtes-vous sûr de vouloir supprimer la compétence "${competence.title}" ? Tous les apprentissages associés seront également supprimés.`,
+      action: () => confirmDeleteCompetence(competenceId)
+    }
+    showConfirmModal.value = true
+  }
 }
 
-const confirmDeleteCompetence = () => {
-  if (competenceToDelete.value) {
-    // Count apprentissages that will be deleted
-    const apprentissagesToDelete = apprentissages.value.filter(a => a.competenceId === competenceToDelete.value)
-    const apprentissagesCount = apprentissagesToDelete.length
+const confirmDeleteCompetence = async (competenceId: string) => {
+  try {
+    // Delete related apprentissages first
+    await apprentissageService.deleteApprentissagesByCompetence(competenceId)
     
-    if (isAuthenticated.value) {
-      // Remove from UI immediately for better UX
-      const competenceIndex = competences.value.findIndex(c => c.id === competenceToDelete.value)
-      let removedCompetence = null
-      let removedApprentissages = []
-      
-      if (competenceIndex !== -1) {
-        // Save for potential rollback
-        removedCompetence = { ...competences.value[competenceIndex] }
-        removedApprentissages = [...apprentissagesToDelete]
-        
-        // Remove from UI immediately
-        competences.value.splice(competenceIndex, 1)
-        apprentissages.value = apprentissages.value.filter(a => a.competenceId !== competenceToDelete.value)
-        
-        // Update counts immediately
-        decrementCountBy('apprentissages', apprentissagesCount)
-        decrementCount('competences')
-      }
-      
-      // Delete from database in background
-      Promise.all([
-        apprentissageService.deleteApprentissagesByCompetence(competenceToDelete.value),
-        competenceService.deleteCompetence(competenceToDelete.value)
-      ]).then(([apprentissagesResult, competenceResult]) => {
-        if (apprentissagesResult.error || competenceResult.error) {
-          console.error('Error deleting competence or apprentissages:', apprentissagesResult.error, competenceResult.error)
-          // Rollback UI changes on error
-          if (removedCompetence && competenceIndex !== -1) {
-            competences.value.splice(competenceIndex, 0, removedCompetence)
-            apprentissages.value.push(...removedApprentissages)
-            // Restore counts
-            incrementCount('competences')
-            incrementCountBy('apprentissages', apprentissagesCount)
-          }
-          alert('Erreur lors de la suppression de la compétence')
+    // Delete competence
+    const { error } = await competenceService.deleteCompetence(competenceId)
+    if (!error) {
+      competences.value = competences.value.filter(c => c.id !== competenceId)
+      apprentissages.value = apprentissages.value.filter(a => a.competenceId !== competenceId)
+      decrementCount('competences')
+      showToast({
+        title: 'Compétence supprimée',
+        message: 'La compétence et ses apprentissages ont été supprimés.'
+      })
+    }
+  } catch (error) {
+    console.error('Error deleting competence:', error)
+    showToast({
+      title: 'Erreur',
+      message: 'Impossible de supprimer la compétence.'
+    })
+  }
+}
+
+const deleteApprentissage = (apprentissageId: string) => {
+  const apprentissage = apprentissages.value.find(a => a.id === apprentissageId)
+  if (apprentissage) {
+    confirmModalData.value = {
+      title: 'Supprimer l\'apprentissage',
+      message: `Êtes-vous sûr de vouloir supprimer l'apprentissage "${apprentissage.title}" ?`,
+      action: () => confirmDeleteApprentissage(apprentissageId)
+    }
+    showConfirmModal.value = true
+  }
+}
+
+const confirmDeleteApprentissage = async (apprentissageId: string) => {
+  try {
+    const { error } = await apprentissageService.deleteApprentissage(apprentissageId)
+    if (!error) {
+      apprentissages.value = apprentissages.value.filter(a => a.id !== apprentissageId)
+      featuredApprentissages.value = featuredApprentissages.value.filter(id => id !== apprentissageId)
+      decrementCount('apprentissages')
+      showToast({
+        title: 'Apprentissage supprimé',
+        message: 'L\'apprentissage a été supprimé avec succès.'
+      })
+    }
+  } catch (error) {
+    console.error('Error deleting apprentissage:', error)
+    showToast({
+      title: 'Erreur',
+      message: 'Impossible de supprimer l\'apprentissage.'
+    })
+  }
+}
+
+const deleteCategory = (categoryId: string) => {
+  const category = categories.value.find(c => c.id === categoryId)
+  if (category) {
+    confirmModalData.value = {
+      title: 'Supprimer l\'apprentissage critique',
+      message: `Êtes-vous sûr de vouloir supprimer l'apprentissage critique "${category.title}" ? Les apprentissages qu'il contient ne seront pas supprimés.`,
+      action: () => confirmDeleteCategory(categoryId)
+    }
+    showConfirmModal.value = true
+  }
+}
+
+const confirmDeleteCategory = async (categoryId: string) => {
+  try {
+    const { error } = await apprentissageCategoryService.deleteCategory(categoryId)
+    if (!error) {
+      categories.value = categories.value.filter(c => c.id !== categoryId)
+      // Remove category reference from apprentissages
+      apprentissages.value.forEach(a => {
+        if (a.categoryId === categoryId) {
+          a.categoryId = undefined
         }
       })
-    } else {
-      // For non-authenticated users, just remove from local state
-      const competenceIndex = competences.value.findIndex(c => c.id === competenceToDelete.value)
-      if (competenceIndex !== -1) {
-        competences.value.splice(competenceIndex, 1)
-      }
-      apprentissages.value = apprentissages.value.filter(a => a.competenceId !== competenceToDelete.value)
+      showToast({
+        title: 'Apprentissage critique supprimé',
+        message: 'L\'apprentissage critique a été supprimé avec succès.'
+      })
     }
-  }
-  cancelDeleteCompetence()
-}
-
-const openProjectFromApprentissage = (projetId: string) => {
-  const projet = projets.value.find(p => p.id === projetId)
-  if (projet) {
-    selectedProject.value = projet
-    showProjectModal.value = true
+  } catch (error) {
+    console.error('Error deleting category:', error)
+    showToast({
+      title: 'Erreur',
+      message: 'Impossible de supprimer l\'apprentissage critique.'
+    })
   }
 }
 
-const closeProjectModal = () => {
-  showProjectModal.value = false
-  selectedProject.value = null
-}
-
-const getProjectDetails = (project: Projet) => {
-  // Adapter les données du projet pour le modal
-  return {
-    id: project.id,
-    title: project.titre,
-    description: project.description,
-    technologies: project.technologies || [],
-    objectifs: ['Objectifs à définir'],
-    realisations: project.fonctionnalites || ['Réalisations à définir'],
-    competences: ['Compétences développées'],
-    duree: project.duree || 'Non spécifié',
-    niveau: project.niveau || 'Non spécifié',
-    fichiers: project.fichiers || []
-  }
-}
-
+// Featured apprentissages
 const toggleFeaturedApprentissage = async (apprentissage: Apprentissage) => {
   if (!isAuthenticated.value) return
   
@@ -1201,36 +1085,76 @@ const toggleFeaturedApprentissage = async (apprentissage: Apprentissage) => {
   
   const isFeatured = featuredApprentissages.value.includes(apprentissage.id)
   
-  if (isFeatured) {
-    // Remove from featured
-    const { error } = await featuredApprentissageService.removeFeaturedApprentissage(user.id, apprentissage.id)
-    if (!error) {
-      featuredApprentissages.value = featuredApprentissages.value.filter(id => id !== apprentissage.id)
+  try {
+    if (isFeatured) {
+      // Remove from featured
+      const { error } = await featuredApprentissageService.removeFeaturedApprentissage(user.id, apprentissage.id)
+      if (!error) {
+        featuredApprentissages.value = featuredApprentissages.value.filter(id => id !== apprentissage.id)
+        showToast({
+          title: 'Retiré des vedettes',
+          message: 'L\'apprentissage a été retiré des vedettes.'
+        })
+      }
+    } else {
+      // Add to featured (check limit)
+      if (featuredApprentissages.value.length >= 6) {
+        showLimitModal.value = true
+        return
+      }
+      
+      const { error } = await featuredApprentissageService.addFeaturedApprentissage(
+        user.id, 
+        apprentissage.id, 
+        featuredApprentissages.value.length + 1
+      )
+      if (!error) {
+        featuredApprentissages.value.push(apprentissage.id)
+        showToast({
+          title: 'Ajouté aux vedettes',
+          message: 'L\'apprentissage a été épinglé en vedette.'
+        })
+      }
     }
-  } else {
-    // Add to featured (check limit)
-    if (featuredApprentissages.value.length >= 3) {
-      showLimitModal.value = true
-      return
-    }
-    
-    const { error } = await featuredApprentissageService.addFeaturedApprentissage(
-      user.id, 
-      apprentissage.id, 
-      featuredApprentissages.value.length + 1
-    )
-    if (!error) {
-      featuredApprentissages.value.push(apprentissage.id)
-    }
+  } catch (error) {
+    console.error('Error toggling featured:', error)
+    showToast({
+      title: 'Erreur',
+      message: 'Impossible de modifier le statut vedette.'
+    })
   }
 }
 
+// Confirm modal handlers
+const confirmAction = () => {
+  if (confirmModalData.value.action) {
+    confirmModalData.value.action()
+  }
+  cancelAction()
+}
+
+const cancelAction = () => {
+  showConfirmModal.value = false
+  confirmModalData.value = { title: '', message: '', action: null }
+}
+
+// Toast notification
+const showToast = (data: { title: string, message: string }) => {
+  toastData.value = data
+  showToastNotification.value = true
+}
+
+const closeToast = () => {
+  showToastNotification.value = false
+}
+
+// Duplicate modal
 const editExistingItem = () => {
   showDuplicateModal.value.show = false
   if (showDuplicateModal.value.existingItem) {
     if ('competenceId' in showDuplicateModal.value.existingItem) {
       // It's an apprentissage
-      openEditModal(showDuplicateModal.value.existingItem)
+      openEditApprentissageModal(showDuplicateModal.value.existingItem)
     } else {
       // It's a competence
       openEditCompetenceModal(showDuplicateModal.value.existingItem)
@@ -1238,148 +1162,27 @@ const editExistingItem = () => {
   }
 }
 
-const handlePremiumNotification = (notificationData: { title: string, message: string }) => {
-  showPremiumNotification.value = true
-  premiumNotificationData.value = notificationData
-}
-
-const handleShowPremiumNotification = (data: { title: string, message: string }) => {
-  showPremiumNotification.value = true
-  premiumNotificationData.value = data
-}
-
-const handlePremiumUpgrade = () => {
-  router.push('/pricing')
-}
-
-// Category management functions
-const openAddCategoryModal = (competenceId: string, level: number) => {
-  if (!isAuthenticated.value) {
-    router.push('/')
-    openAuthModal()
-    return
-  }
-  
-  selectedCategory.value = null
-  categoryCompetenceId.value = competenceId
-  categoryLevel.value = level
-  showCategoryModal.value = true
-}
-
-const openEditCategoryModal = (category: any) => {
-  if (!isAuthenticated.value) {
-    router.push('/')
-    openAuthModal()
-    return
-  }
-  
-  selectedCategory.value = category
-  categoryCompetenceId.value = category.competence_id
-  categoryLevel.value = category.level
-  showCategoryModal.value = true
-}
-
-const closeCategoryModal = () => {
-  showCategoryModal.value = false
-  selectedCategory.value = null
-  categoryCompetenceId.value = ''
-  categoryLevel.value = 1
-}
-
-const saveCategory = async (categoryData: any) => {
-  if (!isAuthenticated.value) return
-  
-  try {
-    if (categoryData.id) {
-      // Update existing category
-      const { data, error } = await apprentissageCategoryService.updateCategory(categoryData.id, {
-        title: categoryData.title,
-        description: categoryData.description
-      })
-      
-      if (!error && data) {
-        const index = categories.value.findIndex(c => c.id === categoryData.id)
-        if (index !== -1) {
-          categories.value[index] = data
-        }
-      }
-    } else {
-      // Create new category
-      const { data, error } = await apprentissageCategoryService.createCategory({
-        competenceId: categoryData.competence_id,
-        level: categoryData.level,
-        title: categoryData.title,
-        description: categoryData.description
-      })
-      
-      if (!error && data) {
-        categories.value.push(data)
-      }
-    }
-  } catch (error) {
-    console.error('Error saving category:', error)
-  }
-  
-  closeCategoryModal()
-}
-
-const deleteCategory = async (categoryId: string) => {
-  if (!isAuthenticated.value) return
-  
-  categoryToDelete.value = categoryId
-  showCategoryConfirmModal.value = true
-}
-
-const confirmDeleteCategory = async () => {
-  if (categoryToDelete.value && isAuthenticated.value) {
-    try {
-      const { error } = await apprentissageCategoryService.deleteCategory(categoryToDelete.value)
-      
-      if (!error) {
-        // Remove from UI
-        categories.value = categories.value.filter(c => c.id !== categoryToDelete.value)
-        
-        // Update apprentissages to remove category reference
-        apprentissages.value = apprentissages.value.map(app => 
-          app.categoryId === categoryToDelete.value ? { ...app, categoryId: undefined } : app
-        )
-      }
-    } catch (error) {
-      console.error('Error deleting category:', error)
-    }
-  }
-  cancelDeleteCategory()
-}
-
-const cancelDeleteCategory = () => {
-  showCategoryConfirmModal.value = false
-  categoryToDelete.value = null
-}
-
-const getCompetenceTitle = (competenceId: string) => {
-  const competence = competences.value.find(c => c.id === competenceId)
-  return competence?.title || 'Compétence'
-}
-
-// Export handler
+// Export functionality
 const handleExportClick = async () => {
+  if (!userLimits.value?.isPremium) {
+    showToast({
+      title: 'Premium Requis',
+      message: 'L\'export Excel est réservé aux utilisateurs Premium.'
+    })
+    return
+  }
+  
   if (!isAuthenticated.value || !userProfile.value) {
-    alert('Impossible d\'exporter : données utilisateur manquantes')
+    showToast({
+      title: 'Erreur',
+      message: 'Données utilisateur manquantes pour l\'export.'
+    })
     return
   }
   
   exportLoading.value = true
   
   try {
-    console.log('Portfolio export - Categories available:', categories.value)
-    console.log('Portfolio export - Apprentissages with categories:', 
-      apprentissages.value.filter(a => a.categoryId).map(a => ({ 
-        title: a.title, 
-        categoryId: a.categoryId 
-      }))
-    )
-    
-    // Préparer les données d'export
     const exportData = prepareExportData(
       userProfile.value,
       competences.value,
@@ -1388,29 +1191,62 @@ const handleExportClick = async () => {
       categories.value
     )
     
-    console.log('Portfolio export data prepared:', {
-      categoriesCount: exportData.categories?.length || 0,
-      apprentissagesCount: exportData.apprentissages.length
-    })
-    
-    // Exporter vers Excel
     await exportPortfolioToExcel(exportData)
     
-    // Afficher un message de succès
-    showPremiumNotification.value = true
-    premiumNotificationData.value = {
+    showToast({
       title: 'Export réussi !',
-      message: 'Votre portfolio a été exporté avec succès au format Excel professionnel.'
-    }
+      message: 'Votre portfolio a été exporté avec succès au format Excel.'
+    })
   } catch (error) {
     console.error('Erreur lors de l\'export:', error)
-    showPremiumNotification.value = true
-    premiumNotificationData.value = {
+    showToast({
       title: 'Erreur d\'export',
-      message: 'Une erreur est survenue lors de l\'export. Veuillez réessayer.'
-    }
+      message: 'Une erreur est survenue lors de l\'export.'
+    })
   } finally {
     exportLoading.value = false
   }
 }
+
+// Utility functions
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 </script>
+
+<style scoped>
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 1s ease-out 0.2s both;
+}
+
+/* Global drag and drop styles */
+:global(.dragging) {
+  cursor: grabbing !important;
+}
+
+:global(.dragging *) {
+  cursor: grabbing !important;
+}
+
+:global(.drag-preview) {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  transform: rotate(5deg);
+  opacity: 0.9;
+}
+</style>

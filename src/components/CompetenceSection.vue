@@ -1,5 +1,5 @@
 <template>
-  <div :id="`competence-${competence.id}`" class="card p-8">
+  <div :id="`competence-${competence.id}`" class="card p-8 relative">
     <!-- Header -->
     <div class="flex items-start justify-between mb-8 cursor-pointer" @click="toggleCompetenceCollapse">
       <div class="flex items-start space-x-4">
@@ -58,9 +58,18 @@
       <div 
         v-for="level in getAllLevels(competence.levels)" 
         :key="level"
-        class="border-l-4 border-primary-300 dark:border-primary-600 pl-6"
+        class="border-l-4 border-primary-300 dark:border-primary-600 pl-6 relative"
       >
-        <div class="flex items-center justify-between mb-4 cursor-pointer" @click="toggleLevelCollapse(level)">
+        <!-- Level Drop Zone -->
+        <DragDropZone
+          :zone-id="`level-${competence.id}-${level}`"
+          type="competence-level"
+          :competence-id="competence.id"
+          :level="level"
+          base-classes="min-h-[60px] rounded-lg border-2 border-dashed border-transparent transition-all duration-300"
+          :accept-types="['category', 'apprentissage']"
+        >
+          <div class="flex items-center justify-between mb-4 cursor-pointer" @click="toggleLevelCollapse(level)">
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
             Niveau {{ level }}
             <button 
@@ -146,7 +155,8 @@
               Connectez-vous pour ajouter des apprentissages
             </p>
           </div>
-        </div>
+          </div>
+        </DragDropZone>
 
         <!-- Categories and Apprentissages for this level -->
         <div 
@@ -154,12 +164,19 @@
           class="space-y-6 transition-all duration-300 ease-in-out"
         >
           <!-- Categories -->
-          <div 
+          <DraggableItem
             v-for="category in getCategoriesForLevel(competence.id, level)"
             :key="category.id"
-            class="bg-white/5 dark:bg-gray-700/30 rounded-xl p-6 border border-white/10 dark:border-gray-600/30 relative group"
-            @contextmenu="handleCategoryRightClick($event, competence.id, level, category.id)"
+            :item-id="category.id"
+            item-type="category"
+            :competence-id="competence.id"
+            :level="level"
+            :data="category"
+            :is-draggable="isAuthenticated"
+            base-classes="bg-white/5 dark:bg-gray-700/30 rounded-xl p-6 border border-white/10 dark:border-gray-600/30 relative group mb-4"
+            show-type-badge
           >
+            <div @contextmenu="handleCategoryRightClick($event, competence.id, level, category.id)">
             <!-- Category Header -->
             <div class="flex items-center justify-between mb-4 cursor-pointer" @click="toggleCategoryCollapse(category.id)">
               <div class="flex items-center space-x-3">
@@ -220,21 +237,38 @@
             <!-- Quick Add Button (visible on hover) -->
             
             <!-- Apprentissages in this category -->
-            <div 
+            <DragDropZone
               v-show="!isCategoryCollapsed(category.id)"
-              class="grid grid-cols-1 lg:grid-cols-2 gap-4 transition-all duration-300 ease-in-out"
+              :zone-id="`category-${category.id}`"
+              type="category"
+              :competence-id="competence.id"
+              :level="level"
+              :category-id="category.id"
+              base-classes="grid grid-cols-1 lg:grid-cols-2 gap-4 transition-all duration-300 ease-in-out min-h-[100px] rounded-lg"
+              :accept-types="['apprentissage']"
             >
-              <ApprentissageCard
+              <DraggableItem
                 v-for="apprentissage in getApprentissagesForCategory(category.id)"
                 :key="apprentissage.id"
-                :apprentissage="apprentissage"
-                :is-featured="isFeatured(apprentissage.id)"
-                @edit="$emit('edit-apprentissage', $event)"
-                @delete="$emit('delete-apprentissage', $event)"
-                @view="$emit('view-apprentissage', $event)"
-                @open-project="$emit('open-project', $event)"
-                @toggle-featured="$emit('toggle-featured', $event)"
+                :item-id="apprentissage.id"
+                item-type="apprentissage"
+                :competence-id="competence.id"
+                :level="level"
+                :category-id="category.id"
+                :data="apprentissage"
+                :is-draggable="isAuthenticated"
+                base-classes="mb-2"
+                show-type-badge
               >
+                <ApprentissageCard
+                  :apprentissage="apprentissage"
+                  :is-featured="isFeatured(apprentissage.id)"
+                  @edit="$emit('edit-apprentissage', $event)"
+                  @delete="$emit('delete-apprentissage', $event)"
+                  @view="$emit('view-apprentissage', $event)"
+                  @open-project="$emit('open-project', $event)"
+                  @toggle-featured="$emit('toggle-featured', $event)"
+                >
                 <template #action-buttons>
                   <slot name="apprentissage-actions" :apprentissage="apprentissage">
                     <button
@@ -267,8 +301,8 @@
                     </button>
                   </slot>
                 </template>
-              </ApprentissageCard>
-            </div>
+              </DraggableItem>
+            </DragDropZone>
             
             <!-- Empty category state -->
             <div 
@@ -289,12 +323,18 @@
                 Ajouter un apprentissage
               </button>
             </div>
-          </div>
+            </div>
+          </DraggableItem>
           
           <!-- Uncategorized Apprentissages -->
-          <div 
+          <DragDropZone
             v-if="getUncategorizedApprentissages(competence.id, level).length > 0 && !isLevelCollapsed(level)"
-            class="bg-gray-50/5 dark:bg-gray-800/30 rounded-xl p-6 border border-gray-200/20 dark:border-gray-700/30"
+            :zone-id="`uncategorized-${competence.id}-${level}`"
+            type="competence-level"
+            :competence-id="competence.id"
+            :level="level"
+            base-classes="bg-gray-50/5 dark:bg-gray-800/30 rounded-xl p-6 border border-gray-200/20 dark:border-gray-700/30 min-h-[120px]"
+            :accept-types="['apprentissage']"
           >
             <div class="flex items-center space-x-3 mb-4">
               <div class="w-8 h-8 bg-gray-400/20 rounded-lg flex items-center justify-center">
@@ -305,18 +345,27 @@
               </div>
             </div>
             
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <ApprentissageCard
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+              <DraggableItem
                 v-for="apprentissage in getUncategorizedApprentissages(competence.id, level)"
                 :key="apprentissage.id"
-                :apprentissage="apprentissage"
-                :is-featured="isFeatured(apprentissage.id)"
-                @edit="$emit('edit-apprentissage', $event)"
-                @delete="$emit('delete-apprentissage', $event)"
-                @view="$emit('view-apprentissage', $event)"
-                @open-project="$emit('open-project', $event)"
-                @toggle-featured="$emit('toggle-featured', $event)"
+                :item-id="apprentissage.id"
+                item-type="apprentissage"
+                :competence-id="competence.id"
+                :level="level"
+                :data="apprentissage"
+                :is-draggable="isAuthenticated"
+                base-classes="mb-2"
               >
+                <ApprentissageCard
+                  :apprentissage="apprentissage"
+                  :is-featured="isFeatured(apprentissage.id)"
+                  @edit="$emit('edit-apprentissage', $event)"
+                  @delete="$emit('delete-apprentissage', $event)"
+                  @view="$emit('view-apprentissage', $event)"
+                  @open-project="$emit('open-project', $event)"
+                  @toggle-featured="$emit('toggle-featured', $event)"
+                >
                 <template #action-buttons>
                   <slot name="apprentissage-actions" :apprentissage="apprentissage">
                     <button
@@ -349,26 +398,36 @@
                     </button>
                   </slot>
                 </template>
-              </ApprentissageCard>
+                </ApprentissageCard>
+              </DraggableItem>
             </div>
-          </div>
+          </DragDropZone>
           
           <!-- Direct Apprentissages (for non-authenticated users) -->
           <div 
             v-if="getDirectApprentissagesForLevel(competence.id, level).length > 0 && !isLevelCollapsed(level)"
             class="grid grid-cols-1 lg:grid-cols-2 gap-4"
           >
-            <ApprentissageCard
+            <DraggableItem
               v-for="apprentissage in getDirectApprentissagesForLevel(competence.id, level)"
               :key="apprentissage.id"
-              :apprentissage="apprentissage"
-              :is-featured="isFeatured(apprentissage.id)"
-              @edit="$emit('edit-apprentissage', $event)"
-              @delete="$emit('delete-apprentissage', $event)"
-              @view="$emit('view-apprentissage', $event)"
-              @open-project="$emit('open-project', $event)"
-              @toggle-featured="$emit('toggle-featured', $event)"
+              :item-id="apprentissage.id"
+              item-type="apprentissage"
+              :competence-id="competence.id"
+              :level="level"
+              :data="apprentissage"
+              :is-draggable="false"
+              base-classes="mb-2"
             >
+              <ApprentissageCard
+                :apprentissage="apprentissage"
+                :is-featured="isFeatured(apprentissage.id)"
+                @edit="$emit('edit-apprentissage', $event)"
+                @delete="$emit('delete-apprentissage', $event)"
+                @view="$emit('view-apprentissage', $event)"
+                @open-project="$emit('open-project', $event)"
+                @toggle-featured="$emit('toggle-featured', $event)"
+              >
               <template #action-buttons>
                 <slot name="apprentissage-actions" :apprentissage="apprentissage">
                   <button
@@ -401,7 +460,8 @@
                   </button>
                 </slot>
               </template>
-            </ApprentissageCard>
+              </ApprentissageCard>
+            </DraggableItem>
           </div>
 
           <!-- Empty state -->
