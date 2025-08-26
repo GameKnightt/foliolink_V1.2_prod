@@ -901,41 +901,56 @@ const loadUserData = async (userId: string) => {
     const { data: profile } = await profileService.getProfile(userId)
     if (profile) {
       userProfile.value = profile
-      
-      // Mettre à jour les données utilisateur si le profil a été modifié
-      if (profile.full_name && currentUser.value) {
-        currentUser.value = {
-          ...currentUser.value,
-          user_metadata: {
-            ...currentUser.value.user_metadata,
-            full_name: profile.full_name
-          }
-        }
-      }
     }
     
     // Load user projects
     const { data: projets } = await projetService.getUserProjets(userId)
     if (projets) {
-      userProjets.value = projets
+      userProjets.value = projets.map(projet => ({
+        ...projet,
+        fichiers: projet.fichiers_projets || []
+      }))
     }
     
     // Load user apprentissages
     const { data: apprentissages } = await apprentissageService.getUserApprentissages(userId)
     if (apprentissages) {
-      userApprentissages.value = apprentissages
+      userApprentissages.value = apprentissages.map(app => ({
+        id: app.id,
+        competenceId: app.competence_id,
+        level: app.level,
+        title: app.title,
+        description: app.description,
+        evaluation: app.evaluation,
+        argumentaire: app.argumentaire,
+        preuves: app.preuves || [],
+        dateCreation: app.created_at,
+        dateModification: app.updated_at
+      }))
     }
     
     // Load featured apprentissages
     const { data: featured } = await featuredApprentissageService.getFeaturedApprentissages(userId)
     if (featured) {
-      featuredApprentissages.value = featured
+      featuredApprentissages.value = featured.map(f => ({
+        ...f,
+        apprentissages: {
+          id: f.apprentissages.id,
+          competence_id: f.apprentissages.competence_id,
+          level: f.apprentissages.level,
+          title: f.apprentissages.title,
+          description: f.apprentissages.description,
+          evaluation: f.apprentissages.evaluation,
+          argumentaire: f.apprentissages.argumentaire,
+          preuves: f.apprentissages.preuves || []
+        }
+      }))
     }
     
     // Load competences for titles
     const { data: userCompetences } = await competenceService.getCompetences()
     if (userCompetences) {
-      competences.value = userCompetences
+      competences.value = userCompetences.filter(c => c.user_id === userId || c.user_id === null)
     }
     
     // Calculate stats
@@ -944,6 +959,13 @@ const loadUserData = async (userId: string) => {
       projets: userProjets.value.length,
       competencesMaitrisees: userApprentissages.value.filter(a => a.evaluation === 'Bien Maîtrisé').length
     }
+    
+    console.log('User data loaded successfully:', {
+      apprentissages: userApprentissages.value.length,
+      projets: userProjets.value.length,
+      featured: featuredApprentissages.value.length,
+      competences: competences.value.length
+    })
   } catch (error) {
     console.error('Error loading user data:', error)
   }
