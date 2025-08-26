@@ -36,6 +36,11 @@
               <option value="evaluation">Évaluation</option>
               <option value="level">Par niveau</option>
             </select>
+            <select v-model="filterFeatured" class="input-field w-full sm:w-auto h-12 min-w-[180px]">
+              <option value="">Tous les apprentissages</option>
+              <option value="featured">Apprentissages vedettes ⭐</option>
+              <option value="not-featured">Non mis en vedette</option>
+            </select>
           </div>
           
           <!-- Second row: Action buttons -->
@@ -364,6 +369,7 @@ const { openAuthModal } = useAuth()
 const searchTerm = ref('')
 const selectedCompetenceFilter = ref('')
 const sortBy = ref('default')
+const filterFeatured = ref('')
 const showModal = ref(false)
 const showViewModal = ref(false)
 const showConfirmModal = ref(false)
@@ -657,6 +663,14 @@ const filteredCompetences = computed(() => {
     )
   }
 
+  // If filtering by featured, only show competences that have featured apprentissages
+  if (filterFeatured.value === 'featured') {
+    filtered = filtered.filter(comp => {
+      const competenceApprentissages = apprentissages.value.filter(app => app.competenceId === comp.id)
+      return competenceApprentissages.some(app => featuredApprentissages.value.includes(app.id))
+    })
+  }
+
   // Apply sorting
   if (sortBy.value === 'title') {
     filtered.sort((a, b) => a.title.localeCompare(b.title))
@@ -687,7 +701,15 @@ const getApprentissagesForCompetence = (competenceId: string) => {
         app.argumentaire.toLowerCase().includes(searchLower)
     }
     
-    return matchesCompetence && matchesSearch
+    // Apply featured filter
+    let matchesFeatured = true
+    if (filterFeatured.value === 'featured') {
+      matchesFeatured = featuredApprentissages.value.includes(app.id)
+    } else if (filterFeatured.value === 'not-featured') {
+      matchesFeatured = !featuredApprentissages.value.includes(app.id)
+    }
+    
+    return matchesCompetence && matchesSearch && matchesFeatured
   })
   
   // Apply sorting
