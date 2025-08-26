@@ -200,30 +200,33 @@
                     <div 
                       v-for="(preuve, index) in form.preuves"
                       :key="index"
-                      class="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded-lg group hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                      class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg group hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                      @click="editPreuve(index)"
                     >
-                      <div class="flex-1">
+                      <div class="flex items-start justify-between">
+                        <div class="flex-1 min-w-0 pr-3">
                         <p class="font-medium text-gray-900 dark:text-white text-sm">{{ preuve.titre }}</p>
                         <p class="text-gray-500 dark:text-gray-400 text-xs">{{ preuve.type }}</p>
-                        <p class="text-gray-500 dark:text-gray-400 text-xs truncate">{{ preuve.url }}</p>
+                          <p class="text-gray-500 dark:text-gray-400 text-xs break-all">{{ preuve.url }}</p>
                       </div>
-                      <div class="flex items-center space-x-2">
-                        <button 
-                          type="button"
-                          @click="editPreuve(index)"
-                          class="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-all duration-200"
-                          title="Modifier la preuve"
-                        >
-                          <PencilIcon class="w-4 h-4" />
-                        </button>
-                        <button 
-                          type="button"
-                          @click="removePreuve(index)"
-                          class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all duration-200"
-                          title="Supprimer la preuve"
-                        >
-                          <TrashIcon class="w-4 h-4" />
-                        </button>
+                        <div class="flex items-center space-x-2 flex-shrink-0">
+                          <button 
+                            type="button"
+                            @click.stop="editPreuve(index)"
+                            class="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-all duration-200"
+                            title="Modifier la preuve"
+                          >
+                            <PencilIcon class="w-4 h-4" />
+                          </button>
+                          <button 
+                            type="button"
+                            @click.stop="removePreuve(index)"
+                            class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all duration-200"
+                            title="Supprimer la preuve"
+                          >
+                            <TrashIcon class="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
