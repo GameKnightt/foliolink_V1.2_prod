@@ -399,8 +399,6 @@
                 </template>
                 </ApprentissageCard>
               </DraggableItem>
-              </DraggableItem>
-              </DraggableItem>
             </div>
           </DragDropZone>
           
