@@ -370,19 +370,17 @@ const handleImageUpload = async (event: Event) => {
   }
 }
 
-const removeImage = () => {
+const removeImage = async () => {
   // If there's a current image, delete it from storage
   if (currentImageUrl.value) {
-    // Call delete function in background
-    backgroundService.deleteBackground(
-      // We'll need the user ID, let's get it
-      authService.getCurrentUser().then(user => {
-        if (user && currentImageUrl.value) {
-          backgroundService.deleteBackground(user.id, currentImageUrl.value)
-            .catch(error => console.warn('Could not delete old background:', error))
-        }
-      })
-    ).catch(error => console.warn('Error deleting background:', error))
+    try {
+      const user = await authService.getCurrentUser()
+      if (user && currentImageUrl.value) {
+        await backgroundService.deleteBackground(user.id, currentImageUrl.value)
+      }
+    } catch (error) {
+      console.warn('Could not delete old background:', error)
+    }
   }
   
   currentImageUrl.value = ''
