@@ -399,6 +399,30 @@ export class ExcelExporter {
     
     return `Portfolio_${userName}_${timestamp}.xlsx`
   }
+
+  async generateArgumentWithAI = async () => {
+    if (!isPremium.value) {
+      aiError.value = 'La génération d\'argumentaire par IA est réservée aux utilisateurs Premium. Achetez Premium pour débloquer cette fonctionnalité.'
+      return
+    }
+
+    if (!userProfile.value) {
+      aiError.value = 'Profil utilisateur non disponible'
+      return
+    }
+
+    if (!form.value.title || !form.value.description || !form.value.competenceId) {
+      aiError.value = 'Veuillez remplir le titre, la description et sélectionner une compétence avant de générer l\'argumentaire'
+      return
+    }
+
+    // Check character limit before AI generation
+    const remainingChars = 1500 - form.value.argumentaire.length
+    if (remainingChars < 200) {
+      aiError.value = 'Pas assez d\'espace restant pour générer un argumentaire (minimum 200 caractères requis)'
+      return
+    }
+  }
 }
 
 /**

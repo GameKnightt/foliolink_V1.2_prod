@@ -390,7 +390,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // Sanitize AI response
-    const sanitizedArgument = sanitizeInput(aiResult.content!, 1500)
+   const sanitizedArgument = sanitizeInput(aiResult.content!, 1500)
     
     if (!sanitizedArgument) {
       console.error('AI generated empty content')

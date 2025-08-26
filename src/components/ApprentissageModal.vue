@@ -167,7 +167,7 @@
                     <textarea
                       v-model="form.argumentaire"
                       required
-                      maxlength="500"
+                      maxlength="1500"
                       rows="6"
                       class="textarea-field"
                       placeholder="Justification de l'évaluation de maîtrise avec exemples concrets"
@@ -185,7 +185,7 @@
                     </button>
                   </div>
                   <div class="text-xs text-gray-400 mt-1 text-right">
-                    {{ form.argumentaire.length }}/500 caractères
+                    {{ form.argumentaire.length }}/1500 caractères
                   </div>
                 </div>
                   
@@ -331,7 +331,7 @@
             <div class="flex items-center justify-between">
               <span class="text-sm text-gray-500 dark:text-gray-400">Longueur de l'argumentaire :</span>
               <span class="text-sm font-medium" :class="form.argumentaire.length > 1200 ? 'text-yellow-600' : 'text-gray-600 dark:text-gray-300'">
-                {{ form.argumentaire.length }}/500 caractères
+                {{ form.argumentaire.length }}/1500 caractères
               </span>
             </div>
             
@@ -339,8 +339,8 @@
             <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div 
                 class="h-2 rounded-full transition-all duration-300"
-                :class="form.argumentaire.length > 400 ? 'bg-yellow-500' : 'bg-blue-500'"
-                :style="{ width: `${Math.min((form.argumentaire.length / 500) * 100, 100)}%` }"
+                :class="form.argumentaire.length > 1200 ? 'bg-yellow-500' : 'bg-blue-500'"
+                :style="{ width: `${Math.min((form.argumentaire.length / 1500) * 100, 100)}%` }"
               ></div>
             </div>
             
@@ -348,7 +348,7 @@
             <div class="relative">
               <textarea
                 v-model="form.argumentaire"
-                maxlength="500"
+                maxlength="1500"
                 rows="20"
                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none text-base leading-relaxed"
                 placeholder="Justification de l'évaluation de maîtrise avec exemples concrets"
