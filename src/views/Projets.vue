@@ -419,14 +419,19 @@ const checkAuthAndLoadData = async () => {
 }
 
 const loadUserProjets = async (userId: string) => {
+  console.log('Loading user projects for:', userId)
+  
   const { data } = await projetService.getUserProjets(userId)
+  console.log('Projects loaded from database:', data)
+  
   if (data) {
     projets.value = data.map(projet => ({
       ...projet,
       fonctionnalites: projet.fonctionnalites || [],
       technologies: projet.technologies || [],
-      fichiers: projet.fichiers || []
+      fichiers: projet.fichiers_projets || []
     }))
+    console.log('Projects mapped for UI:', projets.value)
   }
   
   // Load profile for export
@@ -713,14 +718,17 @@ const saveProjet = (projet: Projet) => {
     // Create new project
     projetService.createProjet(projet).then(({ data, error }) => {
       if (!error && data) {
+        console.log('Project created successfully:', data)
+        
         // Ajout immédiat à l'interface
         const newProjet = {
           ...data,
           fonctionnalites: data.fonctionnalites || [],
           technologies: data.technologies || [],
           competences_developpees: data.competences_developpees || [],
-          fichiers: data.fichiers || []
+          fichiers: data.fichiers_projets || []
         }
+        console.log('Adding project to UI:', newProjet)
         projets.value.unshift(newProjet)
         
         // Update counter immediately
@@ -736,6 +744,7 @@ const saveProjet = (projet: Projet) => {
           message: 'Le nouveau projet a été ajouté avec succès.'
         })
       } else {
+        console.error('Failed to create project:', error)
         showToast({
           title: 'Erreur',
           message: 'Impossible de créer le projet. Veuillez réessayer.'

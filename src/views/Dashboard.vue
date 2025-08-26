@@ -676,9 +676,15 @@ const loadUserApprentissages = async (userId: string) => {
 
 const loadUserProjets = async (userId: string) => {
   try {
+    console.log('Dashboard: Loading projects for user:', userId)
     const { data } = await projetService.getUserProjets(userId)
+    console.log('Dashboard: Projects loaded:', data)
     if (data) {
-      projets.value = data
+      projets.value = data.map(projet => ({
+        ...projet,
+        fichiers: projet.fichiers_projets || []
+      }))
+      console.log('Dashboard: Projects mapped:', projets.value)
     }
   } catch (error) {
     console.error('Error loading projets:', error)

@@ -381,6 +381,8 @@ export const apprentissageService = {
 // Projet Service
 export const projetService = {
   async getUserProjets(userId: string) {
+    console.log('Loading projects for user:', userId)
+    
     return await supabase
       .from('projets')
       .select(`
@@ -395,6 +397,8 @@ export const projetService = {
     const user = await authService.getCurrentUser()
     if (!user) throw new Error('User not authenticated')
 
+    console.log('Creating project with data:', projet)
+    
     // Create project first
     const { data: newProjet, error: projetError } = await supabase
       .from('projets')
@@ -412,12 +416,17 @@ export const projetService = {
       .select()
       .single()
 
+    console.log('Project creation result:', { newProjet, projetError })
+    
     if (projetError || !newProjet) {
+      console.error('Failed to create project:', projetError)
       return { data: null, error: projetError }
     }
 
     // Create fichiers if any
     if (projet.fichiers && projet.fichiers.length > 0) {
+      console.log('Creating fichiers for project:', newProjet.id, projet.fichiers)
+      
       const fichiersData = projet.fichiers.map((fichier: any) => ({
         projet_id: newProjet.id,
         nom: fichier.nom,
@@ -425,12 +434,17 @@ export const projetService = {
         url: fichier.url
       }))
 
-      const { error: fichiersError } = await supabase
+      const { data: createdFichiers, error: fichiersError } = await supabase
         .from('fichiers_projets')
         .insert(fichiersData)
+        .select()
 
       if (fichiersError) {
         console.error('Error creating fichiers:', fichiersError)
+      } else {
+        console.log('Fichiers created successfully:', createdFichiers)
+        // Attach fichiers to the project data
+        newProjet.fichiers_projets = createdFichiers
       }
     }
 
