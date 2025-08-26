@@ -22,15 +22,6 @@
               <XMarkIcon class="w-6 h-6" />
             </button>
           </div>
-          <div class="flex flex-wrap gap-2 mt-3">
-            <span 
-              v-for="tech in project.technologies"
-              :key="tech"
-              class="px-3 py-1 bg-accent-400/20 text-accent-600 dark:text-accent-400 rounded-full text-sm font-medium"
-            >
-              {{ tech }}
-            </span>
-          </div>
         </div>
 
         <!-- Content -->

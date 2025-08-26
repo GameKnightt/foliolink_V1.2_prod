@@ -389,15 +389,6 @@
                <span class="text-2xl">×</span>
              </button>
            </div>
-           <div class="flex flex-wrap gap-2 mt-3">
-             <span 
-               v-for="tech in selectedProjet.technologies"
-               :key="tech"
-               class="px-3 py-1 bg-primary-400/20 text-primary-400 rounded-full text-sm font-medium"
-             >
-               {{ tech }}
-             </span>
-           </div>
          </div>
 
          <!-- Content -->
