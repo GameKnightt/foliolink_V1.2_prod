@@ -132,6 +132,21 @@ onMounted(() => {
             if (route.path !== '/') {
               router.push('/')
             }
+          } else {
+            // Synchroniser les données utilisateur avec le profil existant
+            const syncData = {
+              email: data.user.email || existingProfile.email,
+              full_name: data.user.user_metadata?.full_name || existingProfile.full_name,
+              avatar_url: data.user.user_metadata?.avatar_url || existingProfile.avatar_url
+            }
+            
+            // Mettre à jour seulement si les données ont changé
+            if (syncData.email !== existingProfile.email || 
+                syncData.full_name !== existingProfile.full_name || 
+                syncData.avatar_url !== existingProfile.avatar_url) {
+              await profileService.updateProfile(data.user.id, syncData)
+              console.log('Profile synchronized with auth data')
+            }
           }
         })
       } else {

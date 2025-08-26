@@ -154,6 +154,8 @@ export const profileService = {
   },
 
   async updateProfile(userId: string, profileData: any) {
+    console.log('ProfileService.updateProfile called with:', { userId, profileData })
+    
     return await supabase
       .from('profiles')
       .update({
