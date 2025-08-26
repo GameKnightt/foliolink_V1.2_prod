@@ -339,7 +339,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { profileService, authService, storageService, supabase, type User } from '../lib/supabase'
 import SuccessModal from './SuccessModal.vue'

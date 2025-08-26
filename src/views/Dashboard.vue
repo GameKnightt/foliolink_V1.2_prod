@@ -426,7 +426,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { authService, profileService, competenceService, apprentissageService, projetService, supabase } from '../lib/supabase'
 import { usePremiumLimits } from '../composables/usePremiumLimits'
