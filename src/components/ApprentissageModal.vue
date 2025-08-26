@@ -200,29 +200,55 @@
                     <div 
                       v-for="(preuve, index) in form.preuves"
                       :key="index"
-                      class="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded-lg"
+                      class="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded-lg group hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                     >
                       <div class="flex-1">
                         <p class="font-medium text-gray-900 dark:text-white text-sm">{{ preuve.titre }}</p>
                         <p class="text-gray-500 dark:text-gray-400 text-xs">{{ preuve.type }}</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-xs truncate">{{ preuve.url }}</p>
                       </div>
-                      <button 
-                        type="button"
-                        @click="removePreuve(index)"
-                        class="text-red-500 hover:text-red-700"
-                      >
-                        <TrashIcon class="w-4 h-4" />
-                      </button>
+                      <div class="flex items-center space-x-2">
+                        <button 
+                          type="button"
+                          @click="editPreuve(index)"
+                          class="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-all duration-200"
+                          title="Modifier la preuve"
+                        >
+                          <PencilIcon class="w-4 h-4" />
+                        </button>
+                        <button 
+                          type="button"
+                          @click="removePreuve(index)"
+                          class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all duration-200"
+                          title="Supprimer la preuve"
+                        >
+                          <TrashIcon class="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
 
                   <!-- Formulaire d'ajout de preuve -->
                   <div class="space-y-3 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div v-if="editingPreuveIndex !== null" class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg mb-3">
+                      <div class="flex items-center justify-between">
+                        <span class="text-blue-800 dark:text-blue-200 text-sm font-medium">
+                          ✏️ Modification de la preuve
+                        </span>
+                        <button 
+                          type="button"
+                          @click="cancelEditPreuve"
+                          class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 text-xs"
+                        >
+                          Annuler
+                        </button>
+                      </div>
+                    </div>
                     <div class="grid grid-cols-2 gap-3">
                       <input
                         v-model="newPreuve.titre"
                         type="text"
-                        placeholder="Titre de la preuve"
+                        :placeholder="editingPreuveIndex !== null ? 'Modifier le nom' : 'Nom du fichier/lien'"
                         class="input-field text-sm"
                       />
                       <select v-model="newPreuve.type" class="input-field text-sm">
@@ -260,16 +286,16 @@
                     <input
                       v-model="newPreuve.url"
                       type="url"
-                      placeholder="URL ou lien vers la ressource"
+                      :placeholder="editingPreuveIndex !== null ? 'Modifier l\'URL' : 'URL ou lien vers la ressource'"
                       class="input-field text-sm"
                     />
                     <button 
                       type="button"
-                      @click="addPreuve"
+                      @click="editingPreuveIndex !== null ? updatePreuve() : addPreuve()"
                       :disabled="!newPreuve.titre || !newPreuve.url"
                       class="w-full btn-secondary text-sm py-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Ajouter la preuve
+                      {{ editingPreuveIndex !== null ? 'Modifier la preuve' : 'Ajouter la preuve' }}
                     </button>
                   </div>
                 </div>
@@ -504,7 +530,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
-import { XMarkIcon, TrashIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
+import { XMarkIcon, TrashIcon, ExclamationTriangleIcon, PencilIcon } from '@heroicons/vue/24/outline'
 import type { Competence, Apprentissage, Preuve, Projet } from '../data/portfolio'
 import { aiService, profileService, authService, supabase } from '../lib/supabase'
 
@@ -549,6 +575,7 @@ const newPreuve = ref<Omit<Preuve, 'id'>>({
 })
 
 const selectedProjetId = ref('')
+const editingPreuveIndex = ref<number | null>(null)
 
 // Load user profile for AI context
 onMounted(async () => {
@@ -654,6 +681,39 @@ const addPreuve = () => {
     newPreuve.value = { titre: '', type: 'Rapport', url: '' }
     selectedProjetId.value = ''
   }
+}
+
+const editPreuve = (index: number) => {
+  const preuve = form.value.preuves[index]
+  if (preuve) {
+    newPreuve.value = {
+      titre: preuve.titre,
+      type: preuve.type,
+      url: preuve.url
+    }
+    editingPreuveIndex.value = index
+    
+    // Si c'est un projet, récupérer l'ID du projet
+    if (preuve.projetId) {
+      selectedProjetId.value = preuve.projetId
+    }
+  }
+}
+
+const updatePreuve = () => {
+  if (editingPreuveIndex.value !== null && newPreuve.value.titre && newPreuve.value.url) {
+    form.value.preuves[editingPreuveIndex.value] = {
+      id: form.value.preuves[editingPreuveIndex.value].id,
+      ...newPreuve.value
+    }
+    cancelEditPreuve()
+  }
+}
+
+const cancelEditPreuve = () => {
+  editingPreuveIndex.value = null
+  newPreuve.value = { titre: '', type: 'Rapport', url: '' }
+  selectedProjetId.value = ''
 }
 
 const onProjetSelected = () => {
