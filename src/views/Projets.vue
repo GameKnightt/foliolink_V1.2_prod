@@ -568,7 +568,6 @@ const getProjectDetails = (project: any) => {
   if (existingDetail) {
     return {
       ...existingDetail,
-      technologies: project.technologies || existingDetail.technologies || [],
       competences_developpees: project.competences_developpees || [],
       fichiers: project.fichiers || []
     }

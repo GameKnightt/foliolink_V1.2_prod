@@ -126,11 +126,6 @@ export const authService = {
     })
   },
 
-  async updateUserMetadata(metadata: any) {
-    return await supabase.auth.updateUser({
-      data: metadata
-    })
-  },
   onAuthStateChange(callback: (event: string, session: any) => void) {
     return supabase.auth.onAuthStateChange(callback)
   }
@@ -620,30 +615,8 @@ export const aiService = {
 // Storage Service
 export const storageService = {
   async uploadAvatar(userId: string, file: File) {
-    try {
-      // First, try to delete the existing avatar if it exists
-      const { data: profile } = await profileService.getProfile(userId)
-      if (profile?.avatar_url) {
-        // Extract the file path from the URL
-        const urlParts = profile.avatar_url.split('/')
-        const fileName = urlParts[urlParts.length - 1]
-        const filePath = `${userId}/${fileName}`
-        
-        console.log('Deleting old avatar:', filePath)
-        // Delete old avatar (don't throw error if it doesn't exist)
-        await supabase.storage
-          .from('avatars')
-          .remove([filePath])
-          .catch(error => console.warn('Could not delete old avatar:', error))
-      }
-    } catch (error) {
-      console.warn('Error checking/deleting old avatar:', error)
-      // Continue with upload even if deletion fails
-    }
-
     const fileExt = file.name.split('.').pop()
-    // Use consistent filename to enable overwriting
-    const fileName = `avatar-${userId}.${fileExt}`
+    const fileName = `avatar-${userId}-${Date.now()}.${fileExt}`
     const filePath = `${userId}/${fileName}`
 
     const { data, error } = await supabase.storage
@@ -668,30 +641,8 @@ export const storageService = {
 // Background Service
 export const backgroundService = {
   async uploadBackground(userId: string, file: File) {
-    try {
-      // First, try to delete the existing background if it exists
-      const { data: profile } = await profileService.getProfile(userId)
-      if (profile?.background_url && profile.background_type === 'image') {
-        // Extract the file path from the URL
-        const urlParts = profile.background_url.split('/')
-        const fileName = urlParts[urlParts.length - 1]
-        const filePath = `${userId}/${fileName}`
-        
-        console.log('Deleting old background:', filePath)
-        // Delete old background (don't throw error if it doesn't exist)
-        await supabase.storage
-          .from('backgrounds')
-          .remove([filePath])
-          .catch(error => console.warn('Could not delete old background:', error))
-      }
-    } catch (error) {
-      console.warn('Error checking/deleting old background:', error)
-      // Continue with upload even if deletion fails
-    }
-
     const fileExt = file.name.split('.').pop()
-    // Use consistent filename to enable overwriting
-    const fileName = `background-${userId}.${fileExt}`
+    const fileName = `background-${userId}-${Date.now()}.${fileExt}`
     const filePath = `${userId}/${fileName}`
 
     const { data, error } = await supabase.storage
@@ -717,29 +668,6 @@ export const backgroundService = {
       .from('profiles')
       .update(backgroundData)
       .eq('id', userId)
-  },
-
-  async deleteBackground(userId: string, backgroundUrl: string) {
-    try {
-      // Extract the file path from the URL
-      const urlParts = backgroundUrl.split('/')
-      const fileName = urlParts[urlParts.length - 1]
-      const filePath = `${userId}/${fileName}`
-      
-      const { error } = await supabase.storage
-        .from('backgrounds')
-        .remove([filePath])
-      
-      if (error) {
-        console.error('Error deleting background:', error)
-        return { error }
-      }
-      
-      return { error: null }
-    } catch (error) {
-      console.error('Error in deleteBackground:', error)
-      return { error }
-    }
   }
 }
 
@@ -776,8 +704,6 @@ export const premiumService = {
 // Public Portfolio Service
 export const publicPortfolioService = {
   async getPublicPortfolio(slug: string) {
-    console.log('Loading public portfolio for slug:', slug)
-    
     // Get profile by public slug
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
@@ -786,14 +712,9 @@ export const publicPortfolioService = {
       .eq('is_public', true)
       .single()
 
-    console.log('Profile query result:', { profile, profileError })
-
     if (profileError || !profile) {
-      console.error('Profile not found or not public:', { profileError, profile })
       return { data: null, error: { message: 'Portfolio non trouvé ou privé' } }
     }
-
-    console.log('Found public profile:', profile.id, profile.full_name)
 
     // Get user's competences
     const { data: competences } = await supabase
@@ -801,8 +722,6 @@ export const publicPortfolioService = {
       .select('*')
       .or(`user_id.eq.${profile.id},user_id.is.null`)
       .order('created_at', { ascending: true })
-
-    console.log('Competences loaded:', competences?.length || 0)
 
     // Get user's apprentissages with preuves
     const { data: apprentissages } = await supabase
@@ -814,8 +733,6 @@ export const publicPortfolioService = {
       .eq('user_id', profile.id)
       .order('created_at', { ascending: false })
 
-    console.log('Apprentissages loaded:', apprentissages?.length || 0)
-
     // Get user's projets
     const { data: projets } = await supabase
       .from('projets')
@@ -825,8 +742,6 @@ export const publicPortfolioService = {
       `)
       .eq('user_id', profile.id)
       .order('created_at', { ascending: false })
-
-    console.log('Projets loaded:', projets?.length || 0)
 
     // Get featured apprentissages
     const { data: featured } = await supabase
@@ -841,25 +756,14 @@ export const publicPortfolioService = {
       .eq('user_id', profile.id)
       .order('priority_order', { ascending: true })
 
-    console.log('Featured apprentissages loaded:', featured?.length || 0)
-
-    const portfolioData = {
-      profile,
-      competences: competences || [],
-      apprentissages: apprentissages || [],
-      projets: projets || [],
-      featured: featured || []
-    }
-
-    console.log('Final portfolio data assembled:', {
-      profileId: portfolioData.profile.id,
-      competencesCount: portfolioData.competences.length,
-      apprentissagesCount: portfolioData.apprentissages.length,
-      projetsCount: portfolioData.projets.length,
-      featuredCount: portfolioData.featured.length
-    })
     return {
-      data: portfolioData,
+      data: {
+        profile,
+        competences: competences || [],
+        apprentissages: apprentissages || [],
+        projets: projets || [],
+        featured: featured || []
+      },
       error: null
     }
   },

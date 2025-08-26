@@ -855,18 +855,6 @@ const handleProfileSave = (profileData: any) => {
       full_name: profileData.full_name || userProfile.value?.full_name || currentUser.value?.user_metadata?.full_name || ''
     }
     console.log('Updated userProfile in dashboard:', userProfile.value)
-    
-    // Update the currentUser ref to reflect the changes immediately
-    if (currentUser.value && profileData.full_name) {
-      currentUser.value = {
-        ...currentUser.value,
-        user_metadata: {
-          ...currentUser.value.user_metadata,
-          full_name: profileData.full_name
-        }
-      }
-      console.log('Updated currentUser with new full_name:', currentUser.value)
-    }
   }
   
   // Recharger les données du profil pour s'assurer de la persistance
@@ -874,13 +862,6 @@ const handleProfileSave = (profileData: any) => {
     if (currentUser.value) {
       console.log('Reloading profile data after save...')
       await loadUserProfile(currentUser.value.id)
-      
-      // Also reload the current user from auth to get updated metadata
-      const refreshedUser = await authService.getCurrentUser()
-      if (refreshedUser) {
-        currentUser.value = refreshedUser
-        console.log('Refreshed current user data:', refreshedUser)
-      }
     }
   }, 1000)
 }

@@ -353,7 +353,6 @@ const handleImageUpload = async (event: Event) => {
     const user = await authService.getCurrentUser()
     if (!user) throw new Error('Utilisateur non connecté')
 
-    // The backgroundService.uploadBackground now handles deletion of old background automatically
     const { data, error: uploadError } = await backgroundService.uploadBackground(user.id, file)
     
     if (uploadError) {
@@ -370,19 +369,7 @@ const handleImageUpload = async (event: Event) => {
   }
 }
 
-const removeImage = async () => {
-  // If there's a current image, delete it from storage
-  if (currentImageUrl.value) {
-    try {
-      const user = await authService.getCurrentUser()
-      if (user && currentImageUrl.value) {
-        await backgroundService.deleteBackground(user.id, currentImageUrl.value)
-      }
-    } catch (error) {
-      console.warn('Could not delete old background:', error)
-    }
-  }
-  
+const removeImage = () => {
   currentImageUrl.value = ''
   selectedType.value = 'default'
   clearMessages()

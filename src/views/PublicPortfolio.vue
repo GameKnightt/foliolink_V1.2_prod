@@ -584,34 +584,20 @@ const loadPortfolio = async (slug: string) => {
   loading.value = true
   error.value = ''
   
-  console.log('PublicPortfolio: Loading portfolio for slug:', slug)
-  
   try {
-    // Clear any existing authentication context that might interfere
-    console.log('PublicPortfolio: Calling publicPortfolioService.getPublicPortfolio')
     const { data, error: portfolioError } = await publicPortfolioService.getPublicPortfolio(slug)
     
-    console.log('PublicPortfolio: Service response:', { data: !!data, error: portfolioError })
-    
     if (portfolioError) {
-      console.error('PublicPortfolio: Error from service:', portfolioError)
       error.value = portfolioError.message
     } else if (data) {
-      console.log('PublicPortfolio: Portfolio data received:', {
-        profileName: data.profile?.full_name,
-        competencesCount: data.competences?.length || 0,
-        apprentissagesCount: data.apprentissages?.length || 0,
-        projetsCount: data.projets?.length || 0
-      })
       portfolioData.value = data
       
       // Apply the portfolio owner's theme
       if (data.profile && data.profile.theme) {
-        console.log('PublicPortfolio: Applying theme:', data.profile.theme)
         const htmlElement = document.documentElement
         
         // Remove all existing theme classes
-        const themeClasses = ['theme-light', 'theme-blue', 'theme-green', 'theme-purple', 'theme-orange']
+        const themeClasses = ['theme-light', 'theme-blue', 'theme-green', 'theme-purple']
         themeClasses.forEach(cls => htmlElement.classList.remove(cls))
         
         // Apply the owner's theme
@@ -627,19 +613,14 @@ const loadPortfolio = async (slug: string) => {
         }
       } else {
         // Default to dark theme if no theme specified
-        console.log('PublicPortfolio: Applying default dark theme')
         document.documentElement.classList.add('dark')
       }
-    } else {
-      console.error('PublicPortfolio: No data received from service')
-      error.value = 'Aucune donnée de portfolio reçue'
     }
   } catch (err: any) {
-    console.error('PublicPortfolio: Exception during loading:', err)
     error.value = 'Erreur lors du chargement du portfolio'
+    console.error('Error loading portfolio:', err)
   } finally {
     loading.value = false
-    console.log('PublicPortfolio: Loading completed, error:', error.value)
   }
 }
 
