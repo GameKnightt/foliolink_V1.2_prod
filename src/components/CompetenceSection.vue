@@ -220,12 +220,12 @@
             <!-- Quick Add Button (visible on hover) -->
             <div 
               v-if="isAuthenticated && !isCategoryCollapsed(category.id)"
-              class="absolute top-2 right-16 opacity-0 group-hover:opacity-100 transition-all duration-300"
+              class="absolute top-2 right-20 opacity-0 group-hover:opacity-100 transition-all duration-300 z-0"
             >
               <button 
                 @click="$emit('add-apprentissage', competence.id, level, category.id)"
                 @click.stop
-                class="bg-accent-500 hover:bg-accent-600 text-white p-2 rounded-lg shadow-lg transition-all duration-300 hover:scale-105 flex items-center space-x-1"
+                class="bg-accent-500 hover:bg-accent-600 text-white p-2 rounded-lg shadow-lg transition-all duration-300 hover:scale-105 flex items-center space-x-1 relative"
                 :class="{ 
                   'opacity-60 cursor-not-allowed filter blur-[1px]': !canCreateApprentissage
                 }"
