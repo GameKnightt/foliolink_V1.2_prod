@@ -71,6 +71,21 @@
               </ul>
             </div>
 
+            <!-- Technologies Utilisées -->
+            <div v-if="project.technologies && project.technologies.length > 0">
+              <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                Technologies Utilisées
+              </h4>
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div 
+                  v-for="tech in project.technologies"
+                  :key="tech"
+                  class="bg-primary-100 dark:bg-primary-900 border border-primary-200 dark:border-primary-700 rounded-lg p-3 text-center"
+                >
+                  <p class="text-primary-700 dark:text-primary-300 font-medium text-sm">{{ tech }}</p>
+                </div>
+              </div>
+            </div>
             <!-- Fichiers et Liens -->
             <div v-if="project.fichiers && project.fichiers.length > 0">
               <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
