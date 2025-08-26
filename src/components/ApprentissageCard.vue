@@ -1,20 +1,8 @@
 <template>
   <div 
-    class="card-glass p-6 hover:shadow-lg transition-all duration-300 group cursor-pointer relative"
+    class="card-glass p-6 hover:shadow-lg transition-all duration-300 group cursor-pointer"
     @click="$emit('view', apprentissage)"
   >
-    <!-- Drag Handle (visible on hover for authenticated users) -->
-    <div 
-      v-if="isAuthenticated"
-      class="drag-handle absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-grab active:cursor-grabbing z-10"
-    >
-      <div class="bg-white/10 backdrop-blur-sm rounded-lg p-2">
-        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM14 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM14 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM14 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM20 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM20 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM20 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
-        </svg>
-      </div>
-    </div>
-
     <div 
       class="flex items-start justify-between mb-4"
     >
