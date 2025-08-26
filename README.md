@@ -354,37 +354,6 @@ MISTRAL_API_KEY=your_mistral_api_key
 - **🎨 Éditeur Visuel** : Personnalisation drag & drop
 - **🏆 Compétitions** : Concours entre étudiants
 
-## 📊 Statistiques
-
-### **📈 Adoption (Janvier 2025)**
-- **500+ Étudiants** inscrits et actifs
-- **50+ Établissements** utilisateurs
-- **1000+ Portfolios** créés
-- **95% Satisfaction** utilisateur
-- **99.9% Uptime** depuis le lancement
-
-### **🏆 Impact**
-- **80%** des utilisateurs décrochent leur stage plus rapidement
-- **90%** des portfolios impressionnent les jurys BUT
-- **95%** des étudiants recommandent FolioLink
-- **100%** de conformité avec le Programme National BUT
-- **85%** d'engagement grâce à la gamification
-- **92%** de satisfaction sur la personnalisation
-
-## 🔐 Sécurité et Conformité
-
-### **🛡️ Certifications**
-- **RGPD** : Conformité complète avec DPO dédié
-- **ISO 27001** : Processus de sécurité certifiés
-- **SOC 2 Type II** : Audit de sécurité indépendant
-- **ANSSI** : Recommandations de sécurité appliquées
-
-### **🔒 Audit de Sécurité**
-- **Dernière vérification** : Janvier 2025
-- **Score global** : 9.5/10 (Excellent)
-- **Vulnérabilités critiques** : 0
-- **Temps de réponse incidents** : < 2h
-
 ## 📄 Licence et Légal
 
 ### **📋 Informations Légales**
