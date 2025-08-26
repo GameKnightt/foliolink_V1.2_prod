@@ -704,6 +704,8 @@ export const premiumService = {
 // Public Portfolio Service
 export const publicPortfolioService = {
   async getPublicPortfolio(slug: string) {
+    console.log('Loading public portfolio for slug:', slug)
+    
     // Get profile by public slug
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
@@ -712,9 +714,14 @@ export const publicPortfolioService = {
       .eq('is_public', true)
       .single()
 
+    console.log('Profile query result:', { profile, profileError })
+
     if (profileError || !profile) {
+      console.error('Profile not found or not public:', { profileError, profile })
       return { data: null, error: { message: 'Portfolio non trouvé ou privé' } }
     }
+
+    console.log('Found public profile:', profile.id, profile.full_name)
 
     // Get user's competences
     const { data: competences } = await supabase
@@ -722,6 +729,8 @@ export const publicPortfolioService = {
       .select('*')
       .or(`user_id.eq.${profile.id},user_id.is.null`)
       .order('created_at', { ascending: true })
+
+    console.log('Competences loaded:', competences?.length || 0)
 
     // Get user's apprentissages with preuves
     const { data: apprentissages } = await supabase
@@ -733,6 +742,8 @@ export const publicPortfolioService = {
       .eq('user_id', profile.id)
       .order('created_at', { ascending: false })
 
+    console.log('Apprentissages loaded:', apprentissages?.length || 0)
+
     // Get user's projets
     const { data: projets } = await supabase
       .from('projets')
@@ -742,6 +753,8 @@ export const publicPortfolioService = {
       `)
       .eq('user_id', profile.id)
       .order('created_at', { ascending: false })
+
+    console.log('Projets loaded:', projets?.length || 0)
 
     // Get featured apprentissages
     const { data: featured } = await supabase
@@ -756,14 +769,25 @@ export const publicPortfolioService = {
       .eq('user_id', profile.id)
       .order('priority_order', { ascending: true })
 
+    console.log('Featured apprentissages loaded:', featured?.length || 0)
+
+    const portfolioData = {
+      profile,
+      competences: competences || [],
+      apprentissages: apprentissages || [],
+      projets: projets || [],
+      featured: featured || []
+    }
+
+    console.log('Final portfolio data assembled:', {
+      profileId: portfolioData.profile.id,
+      competencesCount: portfolioData.competences.length,
+      apprentissagesCount: portfolioData.apprentissages.length,
+      projetsCount: portfolioData.projets.length,
+      featuredCount: portfolioData.featured.length
+    })
     return {
-      data: {
-        profile,
-        competences: competences || [],
-        apprentissages: apprentissages || [],
-        projets: projets || [],
-        featured: featured || []
-      },
+      data: portfolioData,
       error: null
     }
   },
