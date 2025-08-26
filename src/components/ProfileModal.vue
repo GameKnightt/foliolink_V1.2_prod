@@ -599,6 +599,18 @@ const handleSubmit = async () => {
         formData: form.value
       })
       
+      // First, update the auth user metadata to ensure consistency
+      const { error: authUpdateError } = await authService.updateUserMetadata({
+        full_name: form.value.fullName.trim()
+      })
+      
+      if (authUpdateError) {
+        console.error('Failed to update auth metadata:', authUpdateError)
+        // Continue with profile update even if auth metadata fails
+      } else {
+        console.log('Auth metadata updated successfully')
+      }
+      
       // Prepare all update data including background settings
       const updateData = {
         email: form.value.email.trim() || null,
@@ -627,12 +639,46 @@ const handleSubmit = async () => {
       } else {
         console.log('Profile update successful, updated data:', updatedProfile)
         
+        // Force refresh the current user data to reflect changes immediately
+        try {
+          const { data: { user: refreshedUser }, error: refreshError } = await supabase.auth.refreshSession()
+          if (refreshError) {
+            console.warn('Failed to refresh session:', refreshError)
+          } else {
+            console.log('Session refreshed successfully')
+          }
+        } catch (refreshException) {
+          console.warn('Exception during session refresh:', refreshException)
+        }
+        
         // Attendre un peu pour que la base de données soit mise à jour
         await new Promise(resolve => setTimeout(resolve, 1000))
         
         // Vérifier que les données ont bien été sauvegardées
         const { data: verificationData, error: verificationError } = await profileService.getProfile(props.user.id)
         console.log('Verification after save:', { verificationData, verificationError })
+        
+        if (verificationError) {
+          console.error('Verification failed:', verificationError)
+          error.value = 'Erreur lors de la vérification de la sauvegarde'
+          return
+        }
+        
+        if (!verificationData) {
+          console.error('No verification data received')
+          error.value = 'Aucune donnée de vérification reçue'
+          return
+        }
+        
+        // Verify that the full_name was actually saved
+        if (verificationData.full_name !== form.value.fullName.trim()) {
+          console.error('Full name not properly saved:', {
+            expected: form.value.fullName.trim(),
+            actual: verificationData.full_name
+          })
+          error.value = 'Le nom complet n\'a pas été sauvegardé correctement'
+          return
+        }
         
         // Émettre les données mises à jour avec le nom complet
         emit('save', verificationData || updatedProfile || updateData)

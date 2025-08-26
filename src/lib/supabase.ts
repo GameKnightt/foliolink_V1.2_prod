@@ -126,6 +126,11 @@ export const authService = {
     })
   },
 
+  async updateUserMetadata(metadata: any) {
+    return await supabase.auth.updateUser({
+      data: metadata
+    })
+  },
   onAuthStateChange(callback: (event: string, session: any) => void) {
     return supabase.auth.onAuthStateChange(callback)
   }
