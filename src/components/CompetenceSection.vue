@@ -324,7 +324,6 @@
               </button>
             </div>
             </div>
-          </DraggableItem>
           
           <!-- Uncategorized Apprentissages -->
           <DragDropZone
@@ -399,6 +398,8 @@
                   </slot>
                 </template>
                 </ApprentissageCard>
+              </DraggableItem>
+              </DraggableItem>
               </DraggableItem>
             </div>
           </DragDropZone>
