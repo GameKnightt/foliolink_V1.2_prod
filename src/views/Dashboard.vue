@@ -426,7 +426,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { authService, profileService, competenceService, apprentissageService, projetService, supabase } from '../lib/supabase'
 import { usePremiumLimits } from '../composables/usePremiumLimits'
@@ -756,9 +756,6 @@ const loadUserProfile = async (userId: string) => {
         updated_at: profile.updated_at
       })
       
-      // Forcer la mise à jour de l'interface utilisateur
-      await nextTick()
-      
       // Check if onboarding should be shown
       await triggerOnboardingFlow(userId, profile)
     } else {
@@ -859,11 +856,6 @@ const handleProfileSave = (profileData: any) => {
     }
     console.log('Updated userProfile in dashboard:', userProfile.value)
   }
-  
-  // Forcer la mise à jour de l'interface
-  nextTick(() => {
-    console.log('UI updated after profile save')
-  })
   
   // Recharger les données du profil pour s'assurer de la persistance
   setTimeout(async () => {

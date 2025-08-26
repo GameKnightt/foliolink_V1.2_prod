@@ -339,7 +339,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { profileService, authService, storageService, supabase, type User } from '../lib/supabase'
 import SuccessModal from './SuccessModal.vue'
@@ -625,25 +625,6 @@ const handleSubmit = async () => {
         error.value = updateError.message
       } else {
         console.log('Profile update successful, updated data:', updatedProfile)
-        
-        // Mettre à jour également la table users pour synchroniser le nom
-        try {
-          const { error: userUpdateError } = await supabase
-            .from('users')
-            .update({
-              full_name: form.value.fullName.trim(),
-              email: form.value.email.trim()
-            })
-            .eq('id', props.user.id)
-          
-          if (userUpdateError) {
-            console.warn('Warning: Could not update users table:', userUpdateError)
-          } else {
-            console.log('Users table updated successfully')
-          }
-        } catch (userError) {
-          console.warn('Warning: Exception updating users table:', userError)
-        }
         
         // Attendre un peu pour que la base de données soit mise à jour
         await new Promise(resolve => setTimeout(resolve, 1000))

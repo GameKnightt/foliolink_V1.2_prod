@@ -154,9 +154,7 @@ export const profileService = {
   },
 
   async updateProfile(userId: string, profileData: any) {
-    console.log('ProfileService.updateProfile called with:', { userId, profileData })
-    
-    const { data, error } = await supabase
+    return await supabase
       .from('profiles')
       .update({
         ...profileData,
@@ -165,24 +163,6 @@ export const profileService = {
       .eq('id', userId)
       .select()
       .single()
-    
-    console.log('Profile update result:', { data, error })
-    
-    if (error) {
-      console.error('Profile update failed:', error)
-      return { data: null, error }
-    }
-    
-    // Vérifier que les données ont bien été mises à jour
-    const { data: verificationData, error: verificationError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
-    
-    console.log('Profile verification after update:', { verificationData, verificationError })
-    
-    return { data: verificationData || data, error: verificationError }
   },
 
   async updateOnboardingStatus(userId: string, completed: boolean) {
