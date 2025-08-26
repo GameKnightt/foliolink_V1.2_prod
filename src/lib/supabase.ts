@@ -126,6 +126,10 @@ export const authService = {
     })
   },
 
+  async updateUser(updates: any) {
+    return await supabase.auth.updateUser(updates)
+  },
+
   onAuthStateChange(callback: (event: string, session: any) => void) {
     return supabase.auth.onAuthStateChange(callback)
   }

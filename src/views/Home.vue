@@ -901,6 +901,17 @@ const loadUserData = async (userId: string) => {
     const { data: profile } = await profileService.getProfile(userId)
     if (profile) {
       userProfile.value = profile
+      
+      // Mettre à jour les données utilisateur si le profil a été modifié
+      if (profile.full_name && currentUser.value) {
+        currentUser.value = {
+          ...currentUser.value,
+          user_metadata: {
+            ...currentUser.value.user_metadata,
+            full_name: profile.full_name
+          }
+        }
+      }
     }
     
     // Load user projects

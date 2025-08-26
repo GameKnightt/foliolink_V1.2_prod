@@ -855,6 +855,18 @@ const handleProfileSave = (profileData: any) => {
       full_name: profileData.full_name || userProfile.value?.full_name || currentUser.value?.user_metadata?.full_name || ''
     }
     console.log('Updated userProfile in dashboard:', userProfile.value)
+    
+    // Mettre à jour également currentUser pour refléter les changements immédiatement
+    if (currentUser.value && profileData.full_name) {
+      currentUser.value = {
+        ...currentUser.value,
+        user_metadata: {
+          ...currentUser.value.user_metadata,
+          full_name: profileData.full_name
+        }
+      }
+      console.log('Updated currentUser metadata:', currentUser.value)
+    }
   }
   
   // Recharger les données du profil pour s'assurer de la persistance
@@ -862,6 +874,17 @@ const handleProfileSave = (profileData: any) => {
     if (currentUser.value) {
       console.log('Reloading profile data after save...')
       await loadUserProfile(currentUser.value.id)
+      
+      // Recharger également les données utilisateur depuis Supabase Auth
+      try {
+        const refreshedUser = await authService.getCurrentUser()
+        if (refreshedUser) {
+          currentUser.value = refreshedUser
+          console.log('Refreshed user data from auth:', refreshedUser)
+        }
+      } catch (authError) {
+        console.warn('Error refreshing user auth data:', authError)
+      }
     }
   }, 1000)
 }

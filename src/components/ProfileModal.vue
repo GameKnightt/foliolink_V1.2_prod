@@ -626,6 +626,23 @@ const handleSubmit = async () => {
       } else {
         console.log('Profile update successful, updated data:', updatedProfile)
         
+        // Mettre à jour également les métadonnées utilisateur dans Supabase Auth
+        try {
+          const { error: authUpdateError } = await authService.updateUser({
+            data: {
+              full_name: form.value.fullName.trim()
+            }
+          })
+          
+          if (authUpdateError) {
+            console.warn('Failed to update auth metadata:', authUpdateError)
+          } else {
+            console.log('Auth metadata updated successfully')
+          }
+        } catch (authError) {
+          console.warn('Error updating auth metadata:', authError)
+        }
+        
         // Attendre un peu pour que la base de données soit mise à jour
         await new Promise(resolve => setTimeout(resolve, 1000))
         
