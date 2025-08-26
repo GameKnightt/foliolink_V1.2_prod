@@ -395,7 +395,8 @@ export const projetService = {
     const user = await authService.getCurrentUser()
     if (!user) throw new Error('User not authenticated')
 
-    return await supabase
+    // Create project first
+    const { data: newProjet, error: projetError } = await supabase
       .from('projets')
       .insert({
         user_id: user.id,
@@ -410,13 +411,38 @@ export const projetService = {
       })
       .select()
       .single()
+
+    if (projetError || !newProjet) {
+      return { data: null, error: projetError }
+    }
+
+    // Create fichiers if any
+    if (projet.fichiers && projet.fichiers.length > 0) {
+      const fichiersData = projet.fichiers.map((fichier: any) => ({
+        projet_id: newProjet.id,
+        nom: fichier.nom,
+        type: fichier.type,
+        url: fichier.url
+      }))
+
+      const { error: fichiersError } = await supabase
+        .from('fichiers_projets')
+        .insert(fichiersData)
+
+      if (fichiersError) {
+        console.error('Error creating fichiers:', fichiersError)
+      }
+    }
+
+    return { data: newProjet, error: null }
   },
 
   async updateProjet(projetId: string, projet: any) {
     const user = await authService.getCurrentUser()
     if (!user) throw new Error('User not authenticated')
 
-    return await supabase
+    // Update project
+    const { data: updatedProjet, error: projetError } = await supabase
       .from('projets')
       .update({
         titre: projet.titre,
@@ -432,6 +458,36 @@ export const projetService = {
       .eq('user_id', user.id)
       .select()
       .single()
+
+    if (projetError) {
+      return { data: null, error: projetError }
+    }
+
+    // Delete existing fichiers
+    await supabase
+      .from('fichiers_projets')
+      .delete()
+      .eq('projet_id', projetId)
+
+    // Create new fichiers if any
+    if (projet.fichiers && projet.fichiers.length > 0) {
+      const fichiersData = projet.fichiers.map((fichier: any) => ({
+        projet_id: projetId,
+        nom: fichier.nom,
+        type: fichier.type,
+        url: fichier.url
+      }))
+
+      const { error: fichiersError } = await supabase
+        .from('fichiers_projets')
+        .insert(fichiersData)
+
+      if (fichiersError) {
+        console.error('Error updating fichiers:', fichiersError)
+      }
+    }
+
+    return { data: updatedProjet, error: null }
   },
 
   async deleteProjet(projetId: string) {

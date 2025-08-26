@@ -683,8 +683,7 @@ const saveProjet = (projet: Projet) => {
       duree: projet.duree,
       fonctionnalites: projet.fonctionnalites,
       technologies: projet.technologies,
-      statut: projet.statut,
-      fichiers: projet.fichiers
+      statut: projet.statut
     }).then(({ data, error }) => {
       if (!error && data) {
         // Mise à jour immédiate de l'interface
