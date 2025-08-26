@@ -463,6 +463,7 @@
               </ApprentissageCard>
             </DraggableItem>
           </div>
+          </div>
 
           <!-- Empty state -->
           <div 
