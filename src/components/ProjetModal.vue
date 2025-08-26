@@ -100,13 +100,13 @@
                 <textarea
                   v-model="form.description"
                   required
-                  maxlength="1500"
+                  maxlength="2000"
                   rows="4"
                   class="textarea-field"
                   placeholder="Description détaillée du projet"
                 ></textarea>
                 <div class="text-xs text-gray-400 mt-1 text-right">
-                  {{ form.description.length }}/1500 caractères
+                  {{ form.description.length }}/2000 caractères
                 </div>
               </div>
 
